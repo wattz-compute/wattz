@@ -1,0 +1,6 @@
+packages:
+  - "packages/sdk-ts"
+  - "packages/cli"
+  - "packages/streaming-payment"
+  - "packages/routing-engine"
+  - "packages/model-registry"

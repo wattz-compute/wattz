@@ -1,0 +1,70 @@
+# Node
+node_modules/
+.pnpm-store/
+.turbo/
+.eslintcache
+*.tsbuildinfo
+coverage/
+
+# Next.js
+.next/
+.vercel/
+
+# Build output
+dist/
+build/
+out/
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Anchor
+.anchor/
+test-ledger/
+packages/anchor-program/target/
+packages/anchor-program/test-ledger/
+
+# Python (bootstrap-nodes monitor)
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.default.json
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Bootstrap secrets
+packages/bootstrap-nodes/secrets/
+packages/bootstrap-nodes/keys/
+packages/bootstrap-nodes/*.tfstate*
+
+# node-runtime local model cache
+packages/node-runtime/models/
+packages/node-runtime/cache/
+
+# Anchor deploy keypair (never commit)
+**/target/deploy/*-keypair.json
+
+# CI local artifacts
+.railway/
