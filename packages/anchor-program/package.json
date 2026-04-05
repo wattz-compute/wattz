@@ -1,0 +1,38 @@
+{
+  "name": "@wattz/anchor-program",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wattz Solana AI Inference Marketplace -- Anchor 0.31 settlement + dispute program",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "anchor build",
+    "test": "anchor test",
+    "test:local": "anchor test --skip-deploy --skip-build",
+    "deploy:mainnet": "anchor deploy --provider.cluster mainnet",
+    "deploy:devnet": "anchor deploy --provider.cluster devnet",
+    "idl:copy": "mkdir -p idl && cp target/idl/wattz_marketplace.json idl/",
+    "idl:init": "anchor idl init --filepath target/idl/wattz_marketplace.json $(solana address -k target/deploy/wattz_marketplace-keypair.json)",
+    "keys:sync": "anchor keys sync",
+    "keys:list": "anchor keys list"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@solana/spl-token": "^0.4.8",
+    "@solana/web3.js": "^1.95.3"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.5",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^22.5.4",
+    "chai": "^4.5.0",
+    "mocha": "^10.7.3",
+    "prettier": "^3.3.3",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
