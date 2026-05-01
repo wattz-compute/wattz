@@ -1,0 +1,69 @@
+[package]
+name = "wattz-inference-gateway"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Wattz OpenAI-compatible inference gateway. TEE attestation + PDA Model Registry + Anchor settlement."
+
+[[bin]]
+name = "wattz-inference-gateway"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+axum = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+reqwest = { workspace = true }
+futures = { workspace = true }
+async-trait = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+bs58 = { workspace = true }
+rand = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+dotenvy = { workspace = true }
+prometheus = { workspace = true }
+
+# Solana / Anchor settlement
+solana-sdk = "2.1"
+solana-client = "2.1"
+solana-program = "2.1"
+
+# Serialization for Anchor accounts / instruction args (matches solana-program 2.1)
+borsh = { version = "1.5", features = ["derive"] }
+
+# Streaming primitives
+async-stream = "0.3"
+eventsource-stream = "0.2"
+bytes = "1"
+http = "1"
+http-body-util = "0.1"
+
+# ed25519 primitive for ZK receipt verification (independent of solana-sdk full)
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+p256 = { version = "0.13", features = ["ecdsa"] }
+p384 = { version = "0.13", features = ["ecdsa"] }
+
+# Base64 for attestation payload decoding
+base64 = "0.22"
+
+# Sync primitives
+parking_lot = "0.12"
+
+# solana-secp256r1-program (transitive via solana-sdk 2.x precompiles)
+# links against openssl. On systems without system libssl-dev / pkg-config
+# we force the vendored build so the crate compiles standalone.
+openssl-sys = { version = "0.9", features = ["vendored"] }
+
+[dev-dependencies]
+tower = { workspace = true, features = ["util"] }
