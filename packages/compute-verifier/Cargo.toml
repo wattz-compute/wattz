@@ -1,0 +1,36 @@
+[package]
+name = "wattz-compute-verifier"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Wattz compute verifier: TEE attestation (Intel SGX DCAP, AMD SEV-SNP, NVIDIA Confidential Computing) + Risc0 / SP1 ZK receipt verification."
+
+[lib]
+name = "wattz_compute_verifier"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde-big-array = "0.5"
+thiserror = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+tracing = { workspace = true }
+
+# ECDSA / EdDSA primitives for attestation and ZK receipt verification.
+# All signatures used by the supported attestation formats are ECDSA over
+# NIST P-256 (SGX DCAP, NVIDIA CC) or NIST P-384 (AMD SEV-SNP). Risc0 /
+# SP1 verifier receipts rely on ed25519 commitments over the inner STARK
+# / Groth16 output.
+p256 = { version = "0.13", features = ["ecdsa", "pem"] }
+p384 = { version = "0.13", features = ["ecdsa"] }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+signature = "2"
+
+base64 = "0.22"
+
+[dev-dependencies]
+rand_core = { version = "0.6", features = ["std", "getrandom"] }
