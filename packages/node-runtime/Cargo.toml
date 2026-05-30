@@ -1,0 +1,59 @@
+[package]
+name = "wattz-node-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Wattz GPU node runtime. Ollama / vLLM / TGI backends + TEE attestation + heartbeat + OpenAI-compatible local endpoint."
+
+[[bin]]
+name = "wattz-node-runtime"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+axum = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde-big-array = "0.5"
+serde_yaml = "0.9"
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+reqwest = { workspace = true }
+futures = { workspace = true }
+async-trait = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+bs58 = { workspace = true }
+rand = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+dotenvy = { workspace = true }
+prometheus = { workspace = true }
+metrics = { workspace = true }
+
+# Bytes helpers for streaming SSE relay
+bytes = "1"
+async-stream = "0.3"
+eventsource-stream = "0.2"
+base64 = "0.22"
+
+# Attestation crate (workspace member)
+wattz-compute-verifier = { path = "../compute-verifier" }
+
+# ed25519 for signing outbound attestation envelopes
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+rand_core = { version = "0.6", features = ["std", "getrandom"] }
+
+# Config loading
+config = { version = "0.14", default-features = false, features = ["yaml"] }
+
+# GPU telemetry (nvml). Optional; falls back to sysinfo when NVML is absent
+sysinfo = "0.32"
+
+[dev-dependencies]
