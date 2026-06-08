@@ -1,0 +1,57 @@
+{
+  "name": "@wattz/sdk",
+  "version": "0.1.0",
+  "description": "Wattz TypeScript SDK. OpenAI-compatible client for the Wattz Solana AI Inference Marketplace.",
+  "license": "Apache-2.0",
+  "author": "Wattz Labs",
+  "homepage": "https://wattz.fi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wattz-compute/wattz"
+  },
+  "keywords": [
+    "wattz",
+    "solana",
+    "ai",
+    "inference",
+    "openai-compatible",
+    "llm",
+    "sdk"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "20.16.11",
+    "rimraf": "6.0.1",
+    "tsup": "8.3.0",
+    "typescript": "5.6.3",
+    "vitest": "2.1.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false
+}
