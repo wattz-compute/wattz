@@ -1,0 +1,60 @@
+{
+  "name": "wattz-cli",
+  "version": "0.1.0",
+  "description": "Wattz CLI. Operate a Solana AI inference GPU node, publish models, and run inference from the terminal.",
+  "license": "Apache-2.0",
+  "author": "Wattz Labs",
+  "homepage": "https://wattz.fi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wattz-compute/wattz"
+  },
+  "keywords": [
+    "wattz",
+    "solana",
+    "cli",
+    "gpu",
+    "inference",
+    "llm",
+    "openai-compatible",
+    "operator"
+  ],
+  "type": "module",
+  "bin": {
+    "wattz": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.30.1",
+    "@solana/web3.js": "1.95.4",
+    "@wattz/sdk": "workspace:*",
+    "chalk": "5.3.0",
+    "commander": "12.1.0",
+    "inquirer": "10.2.2",
+    "ora": "8.1.0",
+    "yaml": "2.5.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "9.0.7",
+    "@types/node": "20.16.11",
+    "rimraf": "6.0.1",
+    "tsup": "8.3.0",
+    "typescript": "5.6.3",
+    "vitest": "2.1.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
