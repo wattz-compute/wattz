@@ -1,0 +1,49 @@
+# syntax=docker/dockerfile:1.7
+#
+# Wattz bootstrap node image. Ships the compiled `wattz-node-runtime`
+# binary plus a bootstrap Ollama daemon. When you launch the container
+# it: (1) starts ollama, (2) pulls the configured model, (3) launches
+# node-runtime pointing at the local ollama endpoint.
+
+FROM rust:1.83-slim-bookworm AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config libssl-dev clang cmake git && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY Cargo.toml Cargo.toml
+COPY packages/compute-verifier packages/compute-verifier
+COPY packages/node-runtime packages/node-runtime
+COPY packages/inference-gateway packages/inference-gateway
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/src/target \
+    cargo build --release -p wattz-node-runtime && \
+    cp /src/target/release/wattz-node-runtime /usr/local/bin/wattz-node-runtime
+
+FROM debian:bookworm-slim AS runtime
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    OLLAMA_HOST=0.0.0.0 \
+    OLLAMA_MODELS=/var/lib/ollama/models
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl gnupg jq bash tini && \
+    curl -fsSL https://ollama.com/install.sh | sh && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local/bin/wattz-node-runtime /usr/local/bin/wattz-node-runtime
+COPY packages/bootstrap-nodes/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY packages/bootstrap-nodes/config/node.default.yaml /etc/wattz/node.default.yaml
+COPY packages/bootstrap-nodes/config/models.registry.yaml /etc/wattz/models.registry.yaml
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+EXPOSE 8081 11434
+
+ENV WATTZ_MODELS_FILE=/etc/wattz/models.registry.yaml
+ENV WATTZ_NODE_BACKEND=ollama
+ENV WATTZ_NODE_BACKEND_URL=http://127.0.0.1:11434
+ENV NODE_HTTP_LISTEN=0.0.0.0:8081
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/usr/local/bin/entrypoint.sh"]

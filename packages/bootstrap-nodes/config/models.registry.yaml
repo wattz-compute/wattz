@@ -1,0 +1,25 @@
+# Models served by the Wattz bootstrap fleet.
+#
+# This file is read by the node-runtime binary via WATTZ_MODELS_FILE and
+# by the deploy scripts to know which models to `ollama pull`. Prices are
+# expressed in raw USDC micro-lamports per 1k tokens ($0.10 = 100000).
+
+models:
+  - name: llama-3-8b-instruct
+    context_window: 8192
+    price_per_1k_input_tokens: 0.10
+    price_per_1k_output_tokens: 0.20
+    license: Meta Llama 3 Community License
+    kyc_required: true
+  - name: mistral-7b-instruct-v0.3
+    context_window: 32768
+    price_per_1k_input_tokens: 0.08
+    price_per_1k_output_tokens: 0.16
+    license: Apache-2.0
+    kyc_required: false
+  - name: whisper-base
+    context_window: 0
+    price_per_1k_input_tokens: 0.0
+    price_per_1k_output_tokens: 0.03
+    license: MIT
+    kyc_required: false

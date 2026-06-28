@@ -1,0 +1,28 @@
+# Prometheus scrape configuration for a Wattz bootstrap node stack.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    fleet: wattz-bootstrap
+
+scrape_configs:
+  - job_name: node-runtime
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - wattz-node:8081
+        labels:
+          service: wattz-node-runtime
+
+  - job_name: ollama
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - wattz-node:11434
+        labels:
+          service: ollama
+
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090

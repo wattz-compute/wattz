@@ -1,0 +1,76 @@
+# Wattz bootstrap node docker-compose.
+#
+# Runs node-runtime + Ollama in one container (the "wattz-node" service)
+# and Prometheus + Grafana as siblings so the operator can inspect
+# metrics on http://<host>:3000. Configure the model via the WATTZ_MODEL
+# environment variable in the .env file next to this compose file.
+
+services:
+  wattz-node:
+    build:
+      context: ../../../
+      dockerfile: packages/bootstrap-nodes/docker/Dockerfile.node
+    image: wattz-node:0.1.0
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+      - "11434:11434"
+    environment:
+      WATTZ_NODE_ID: ${WATTZ_NODE_ID:-wattz-bootstrap-01}
+      WATTZ_NODE_REGION: ${WATTZ_NODE_REGION:-us-east}
+      WATTZ_NODE_BACKEND: ollama
+      WATTZ_NODE_BACKEND_URL: http://127.0.0.1:11434
+      WATTZ_NODE_TEE: ${WATTZ_NODE_TEE:-software}
+      WATTZ_NODE_ATT_KEY: /var/lib/wattz/att_key
+      WATTZ_MODEL: ${WATTZ_MODEL:-llama3:8b-instruct-q4_K_M}
+      NODE_HTTP_LISTEN: 0.0.0.0:8081
+      INFERENCE_GATEWAY_URL: ${INFERENCE_GATEWAY_URL:-https://api.wattz.fi}
+      BOOTSTRAP_NODE_TOKEN: ${BOOTSTRAP_NODE_TOKEN:-}
+      RUST_LOG: info,wattz_node_runtime=debug
+    volumes:
+      - ollama-models:/var/lib/ollama/models
+      - node-state:/var/lib/wattz
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8081/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    restart: unless-stopped
+    volumes:
+      - ../config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana-oss:11.4.0
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-wattz-admin}
+      GF_INSTALL_PLUGINS: ""
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  ollama-models:
+  node-state:
+  prom-data:
+  grafana-data:

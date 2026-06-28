@@ -1,0 +1,27 @@
+# Default node-runtime knobs.
+#
+# The Wattz node-runtime primarily reads its configuration from environment
+# variables (see packages/node-runtime/src/config.rs). This YAML captures
+# the values operators most commonly override so a compose file can bind
+# it as a config volume.
+
+node:
+  region: us-east
+  backend: ollama
+  backend_url: http://127.0.0.1:11434
+  attestation_type: software
+  heartbeat_interval_seconds: 30
+
+logging:
+  level: info
+  format: json
+
+metrics:
+  bind: 0.0.0.0:9464
+
+# Anti-abuse limits enforced by the gateway before requests reach the
+# node. Repeated here for operator visibility.
+limits:
+  max_input_tokens_per_request: 4096
+  max_output_tokens_per_request: 2048
+  max_concurrent_requests: 4
