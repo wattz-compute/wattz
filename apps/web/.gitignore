@@ -1,0 +1,9 @@
+node_modules
+.next
+.next-standalone
+.env.local
+.env.production.local
+.env.development.local
+next-env.d.ts.bak
+*.log
+.DS_Store
