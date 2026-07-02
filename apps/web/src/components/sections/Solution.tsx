@@ -47,8 +47,7 @@ const flow = [
 export function SolutionSection() {
   return (
     <section id="solution" className="relative py-28 sm:py-36">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-wire-glow" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 opacity-[0.03] mix-blend-screen" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-wire-glow/[0.05] to-transparent mix-blend-screen" />
       <div className="mx-auto max-w-7xl px-6">
         <ScrollReveal>
           <div className="max-w-3xl">
