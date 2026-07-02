@@ -3,11 +3,11 @@
 
 Runs alongside the Wattz node-runtime and posts a small JSON heartbeat
 to a caller-supplied status URL every 30 seconds. Used by the Wattz
-status page (https://status.wattz.fi) to plot per-node uptime independent
+status page (https://wattz.fi/status) to plot per-node uptime independent
 of the routing engine.
 
 Environment:
-  WATTZ_STATUS_URL          POST target, e.g. https://status.wattz.fi/hb
+  WATTZ_STATUS_URL          POST target, e.g. https://wattz.fi/status/hb
   WATTZ_STATUS_TOKEN        Bearer token for the status API.
   WATTZ_NODE_ID             Node identifier (matches heartbeat).
   WATTZ_NODE_METRICS_URL    Node runtime metrics URL

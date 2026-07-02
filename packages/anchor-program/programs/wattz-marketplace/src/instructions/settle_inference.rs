@@ -1,6 +1,6 @@
 //! `settle_inference` -- once the dispute window elapses without a dispute,
-//! distribute the price across node / publisher / treasury and burn the
-//! project fee share (buy-back + burn simulation).
+//! distribute the price across node / publisher / treasury and burn half of
+//! the project fee via a direct SPL Token burn CPI.
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Burn, Mint, Token, TokenAccount, Transfer};
@@ -166,7 +166,7 @@ pub fn handler(ctx: Context<SettleInference>) -> Result<()> {
         )?;
     }
 
-    // 4. Buy-back + burn.
+    // 4. Burn half of the project fee (direct SPL Token burn CPI).
     if burn_amount > 0 {
         let cpi = Burn {
             mint: ctx.accounts.mint.to_account_info(),

@@ -11,7 +11,7 @@ async function main() {
   const wattz = new WattzClient({ apiKey: process.env.WATTZ_API_KEY });
 
   const res = await wattz.images.generate({
-    model: 'stable-diffusion-xl-base-1.0',
+    model: 'stable-diffusion-xl-1.0',
     prompt: 'A giant nighttime substation with glowing cyan power lines and low fog, industrial infrastructure aesthetic, muted palette',
     size: '1024x1024',
     n: 1,

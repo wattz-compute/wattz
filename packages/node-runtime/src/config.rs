@@ -56,21 +56,20 @@ pub struct Config {
 
 impl Config {
     pub fn from_env() -> Result<Self> {
-        let node_id = std::env::var("WATTZ_NODE_ID")
-            .unwrap_or_else(|_| default_node_id());
+        let node_id = std::env::var("WATTZ_NODE_ID").unwrap_or_else(|_| default_node_id());
         let region = std::env::var("WATTZ_NODE_REGION").unwrap_or_else(|_| "us-east".into());
         let gateway_url = std::env::var("INFERENCE_GATEWAY_URL")
             .unwrap_or_else(|_| "http://localhost:8080".into());
-        let bootstrap_token = std::env::var("BOOTSTRAP_NODE_TOKEN").unwrap_or_else(|_| String::new());
-        let listen_addr = std::env::var("NODE_HTTP_LISTEN").unwrap_or_else(|_| "0.0.0.0:8081".into());
+        let bootstrap_token =
+            std::env::var("BOOTSTRAP_NODE_TOKEN").unwrap_or_else(|_| String::new());
+        let listen_addr =
+            std::env::var("NODE_HTTP_LISTEN").unwrap_or_else(|_| "0.0.0.0:8081".into());
         let backend = Backend::parse(
             &std::env::var("WATTZ_NODE_BACKEND").unwrap_or_else(|_| "ollama".into()),
         )?;
         let backend_url = std::env::var("WATTZ_NODE_BACKEND_URL")
             .unwrap_or_else(|_| default_backend_url(backend).into());
-        let attestation_key_file = std::env::var("WATTZ_NODE_ATT_KEY")
-            .ok()
-            .map(PathBuf::from);
+        let attestation_key_file = std::env::var("WATTZ_NODE_ATT_KEY").ok().map(PathBuf::from);
         let attestation_type =
             std::env::var("WATTZ_NODE_TEE").unwrap_or_else(|_| "software".into());
         let heartbeat_interval = Duration::from_secs(
@@ -79,7 +78,8 @@ impl Config {
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(30),
         );
-        let payout_address = std::env::var("WATTZ_PAYOUT_ADDRESS").unwrap_or_else(|_| String::new());
+        let payout_address =
+            std::env::var("WATTZ_PAYOUT_ADDRESS").unwrap_or_else(|_| String::new());
 
         let models = load_models()?;
 
@@ -134,27 +134,27 @@ struct ModelsDoc {
 fn default_models() -> Vec<ModelSpec> {
     vec![
         ModelSpec {
-            name: "llama-3-8b-instruct".into(),
-            context_window: 8192,
-            price_per_1k_input_tokens: 0.10,
-            price_per_1k_output_tokens: 0.20,
-            license: "Meta Llama 3 Community License".into(),
+            name: "llama-3.1-8b-instant".into(),
+            context_window: 131072,
+            price_per_1k_input_tokens: 0.05,
+            price_per_1k_output_tokens: 0.10,
+            license: "Llama 3.1 Community License".into(),
             kyc_required: false,
         },
         ModelSpec {
-            name: "mistral-7b-instruct".into(),
-            context_window: 32768,
+            name: "llama-3.3-70b-versatile".into(),
+            context_window: 131072,
+            price_per_1k_input_tokens: 0.30,
+            price_per_1k_output_tokens: 0.60,
+            license: "Llama 3.3 Community License".into(),
+            kyc_required: false,
+        },
+        ModelSpec {
+            name: "gpt-oss-20b".into(),
+            context_window: 131072,
             price_per_1k_input_tokens: 0.08,
             price_per_1k_output_tokens: 0.16,
             license: "Apache-2.0".into(),
-            kyc_required: false,
-        },
-        ModelSpec {
-            name: "whisper-base".into(),
-            context_window: 0,
-            price_per_1k_input_tokens: 0.00,
-            price_per_1k_output_tokens: 0.03,
-            license: "MIT".into(),
             kyc_required: false,
         },
     ]

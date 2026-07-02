@@ -221,13 +221,8 @@ mod tests {
     fn variant_unsupported() {
         let signing_key = SigningKey::generate(&mut OsRng);
         let vk_hash = [0; 32];
-        let mut envelope = build_envelope(
-            &signing_key,
-            Sp1Variant::Groth16,
-            &vk_hash,
-            b"",
-            &[0; 64],
-        );
+        let mut envelope =
+            build_envelope(&signing_key, Sp1Variant::Groth16, &vk_hash, b"", &[0; 64]);
         envelope[8] = 99; // variant byte
         let vk = signing_key.verifying_key();
         assert!(matches!(

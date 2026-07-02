@@ -91,10 +91,7 @@ pub struct SevSnpClaims {
 ///
 /// The caller is responsible for validating the VCEK certificate chain
 /// against the AMD ARK/ASK roots before pinning it here.
-pub fn verify_sev_snp_report(
-    report: &[u8],
-    vcek_sec1: &[u8],
-) -> Result<SevSnpClaims, VerifyError> {
+pub fn verify_sev_snp_report(report: &[u8], vcek_sec1: &[u8]) -> Result<SevSnpClaims, VerifyError> {
     if report.len() < REPORT_LEN {
         return Err(VerifyError::Truncated {
             expected: REPORT_LEN,
@@ -196,8 +193,7 @@ mod tests {
         report[0x010..0x020].copy_from_slice(&[0x22; 16]); // family_id
         report[0x020..0x030].copy_from_slice(&[0x33; 16]); // image_id
         report[0x030..0x034].copy_from_slice(&0u32.to_le_bytes()); // vmpl
-        report[0x034..0x038]
-            .copy_from_slice(&SIG_ALGO_ECDSA_P384_SHA384.to_le_bytes()); // algo
+        report[0x034..0x038].copy_from_slice(&SIG_ALGO_ECDSA_P384_SHA384.to_le_bytes()); // algo
         report[0x038..0x040].copy_from_slice(&0x12345u64.to_le_bytes()); // current_tcb
         report[0x040..0x048].copy_from_slice(&0xF00Du64.to_le_bytes()); // platform_info
         report[0x050..0x090].copy_from_slice(&[0x55; 64]); // report_data

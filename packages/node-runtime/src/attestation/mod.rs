@@ -146,9 +146,7 @@ mod hex_option_bytes {
         match opt {
             None => Ok(None),
             Some(s) if s.is_empty() => Ok(None),
-            Some(s) => hex::decode(s)
-                .map(Some)
-                .map_err(serde::de::Error::custom),
+            Some(s) => hex::decode(s).map(Some).map_err(serde::de::Error::custom),
         }
     }
 }

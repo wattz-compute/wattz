@@ -79,10 +79,10 @@ pub(crate) fn read_u64_le(bytes: &[u8]) -> Result<u64, VerifyError> {
     Ok(u64::from_le_bytes(buf))
 }
 
+pub use tee::nvidia_cc::{verify_nvidia_cc_quote, NvidiaCcClaims};
 /// Convenience re-export for external consumers.
 pub use tee::sev::{verify_sev_snp_report, SevSnpClaims};
 pub use tee::sgx::{verify_sgx_quote, SgxClaims};
-pub use tee::nvidia_cc::{verify_nvidia_cc_quote, NvidiaCcClaims};
 pub use zk::risc0::{verify_risc0_receipt, Risc0Claims};
 pub use zk::sp1::{verify_sp1_proof, Sp1Claims};
 
@@ -103,7 +103,10 @@ mod tests {
         let bytes = [1u8, 2];
         assert!(matches!(
             take(&bytes, 3),
-            Err(VerifyError::Truncated { expected: 3, actual: 2 })
+            Err(VerifyError::Truncated {
+                expected: 3,
+                actual: 2
+            })
         ));
     }
 

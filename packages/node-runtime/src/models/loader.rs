@@ -51,7 +51,10 @@ impl ModelLoader {
         let resp = self
             .http
             .post(&url)
-            .json(&PullReq { name, stream: false })
+            .json(&PullReq {
+                name,
+                stream: false,
+            })
             .send()
             .await
             .with_context(|| format!("POST {}", url))?;

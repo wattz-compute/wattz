@@ -13,7 +13,7 @@ async function main() {
   });
 
   const stream = wattz.chat.completions.create({
-    model: 'llama-3-8b-instruct',
+    model: 'llama-3.1-8b-instant',
     messages: [{ role: 'user', content: 'Write a haiku about a substation at night.' }],
     stream: true,
     require_tee: true,

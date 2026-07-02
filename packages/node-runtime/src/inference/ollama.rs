@@ -37,7 +37,10 @@ impl InferenceBackend for OllamaBackend {
     }
 
     async fn chat_completion(&self, req: &ChatRequest) -> Result<ChatCompletion> {
-        let url = format!("{}/v1/chat/completions", self.base_url.trim_end_matches('/'));
+        let url = format!(
+            "{}/v1/chat/completions",
+            self.base_url.trim_end_matches('/')
+        );
         let mut body = serde_json::to_value(req)?;
         // Ollama does not implement the OpenAI `stream=true` flag on the
         // non-streaming path, so we force it off here regardless of what
@@ -55,7 +58,11 @@ impl InferenceBackend for OllamaBackend {
         if !resp.status().is_success() {
             let status = resp.status();
             let body = resp.text().await.unwrap_or_default();
-            return Err(anyhow!("ollama chat completion failed ({}): {}", status, body));
+            return Err(anyhow!(
+                "ollama chat completion failed ({}): {}",
+                status,
+                body
+            ));
         }
         let out: ChatCompletion = resp.json().await.context("decode ollama response")?;
         Ok(out)
@@ -65,7 +72,10 @@ impl InferenceBackend for OllamaBackend {
         &self,
         req: &ChatRequest,
     ) -> Result<BoxStream<'static, Result<Bytes>>> {
-        let url = format!("{}/v1/chat/completions", self.base_url.trim_end_matches('/'));
+        let url = format!(
+            "{}/v1/chat/completions",
+            self.base_url.trim_end_matches('/')
+        );
         let mut body = serde_json::to_value(req)?;
         if let Some(obj) = body.as_object_mut() {
             obj.insert("stream".into(), serde_json::Value::Bool(true));

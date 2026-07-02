@@ -13,7 +13,7 @@ async function main() {
   });
 
   const res = await wattz.chat.completions.create({
-    model: 'llama-3-8b-instruct',
+    model: 'llama-3.1-8b-instant',
     messages: [
       { role: 'system', content: 'You are a concise industrial-infrastructure historian.' },
       { role: 'user', content: 'Explain what a substation does in two sentences.' },

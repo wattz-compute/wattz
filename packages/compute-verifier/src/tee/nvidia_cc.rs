@@ -91,8 +91,8 @@ pub fn verify_nvidia_cc_quote(
         .map_err(|_| VerifyError::Malformed("invalid REK encoding"))?;
     let verifying_key = VerifyingKey::from_encoded_point(&point)
         .map_err(|_| VerifyError::Malformed("REK not on curve"))?;
-    let signature =
-        Signature::from_slice(&sig_bytes[..SIG_LEN]).map_err(|_| VerifyError::InvalidSignatureEncoding)?;
+    let signature = Signature::from_slice(&sig_bytes[..SIG_LEN])
+        .map_err(|_| VerifyError::InvalidSignatureEncoding)?;
     verifying_key
         .verify(header, &signature)
         .map_err(|_| VerifyError::SignatureMismatch)?;

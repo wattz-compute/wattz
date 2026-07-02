@@ -57,12 +57,7 @@ pub async fn run(state: NodeState) {
 async fn send_once(state: &NodeState, http: &reqwest::Client) -> anyhow::Result<()> {
     let uptime = (chrono::Utc::now() - state.started_at).num_seconds().max(0);
     let loaded = state.backend.list_models().await.unwrap_or_default();
-    let configured: Vec<String> = state
-        .config
-        .models
-        .iter()
-        .map(|m| m.name.clone())
-        .collect();
+    let configured: Vec<String> = state.config.models.iter().map(|m| m.name.clone()).collect();
     let gpu = read_gpu_telemetry();
     let hb = Heartbeat {
         node_id: state.config.node_id.clone(),

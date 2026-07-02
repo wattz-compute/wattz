@@ -203,8 +203,8 @@ pub fn verify_sgx_quote(quote: &[u8], trusted_key: &[u8]) -> Result<SgxClaims, V
     let verifying_key = VerifyingKey::from_encoded_point(&verifying_key_point)
         .map_err(|_| VerifyError::Malformed("attestation key is not on curve"))?;
 
-    let signature = Signature::from_slice(ecdsa_sig)
-        .map_err(|_| VerifyError::InvalidSignatureEncoding)?;
+    let signature =
+        Signature::from_slice(ecdsa_sig).map_err(|_| VerifyError::InvalidSignatureEncoding)?;
 
     verifying_key
         .verify(signed_region, &signature)

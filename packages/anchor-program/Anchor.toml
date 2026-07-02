@@ -11,14 +11,11 @@ wattz_marketplace = "GUDVbE4Jgmtu8jgxUVtq2wUmjdLxJzPqT3zET2EdTLiU"
 [programs.localnet]
 wattz_marketplace = "GUDVbE4Jgmtu8jgxUVtq2wUmjdLxJzPqT3zET2EdTLiU"
 
-[programs.mainnet]
-wattz_marketplace = "GUDVbE4Jgmtu8jgxUVtq2wUmjdLxJzPqT3zET2EdTLiU"
-
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "mainnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
@@ -32,7 +29,7 @@ upgradeable = false
 
 [test.validator]
 bind_address = "0.0.0.0"
-url = "https://api.mainnet-beta.solana.com"
+url = "https://api.devnet.solana.com"
 ledger = ".anchor/test-ledger"
 rpc_port = 8899
 

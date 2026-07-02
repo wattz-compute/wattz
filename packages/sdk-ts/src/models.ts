@@ -16,8 +16,8 @@ export interface ModelListQuery {
 
 /**
  * Models namespace. `GET /v1/models` returns every model registered in the
- * Wattz PDA model registry (Llama 3, Mistral, Stable Diffusion, Whisper,
- * GPT-OSS, etc.) with license and price metadata.
+ * Wattz PDA model registry (Llama, GPT-OSS, Stable Diffusion XL, Whisper,
+ * etc.) with license and price metadata.
  */
 export class Models {
   constructor(private readonly client: WattzClient) {}

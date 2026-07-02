@@ -14,8 +14,10 @@ pub struct MetricsRegistry {
 impl MetricsRegistry {
     pub fn new() -> Result<Self> {
         let registry = Registry::new();
-        let requests_total =
-            IntCounter::new("wattz_node_requests_total", "Total inference requests received")?;
+        let requests_total = IntCounter::new(
+            "wattz_node_requests_total",
+            "Total inference requests received",
+        )?;
         let completed_total = IntCounter::new(
             "wattz_node_completed_total",
             "Total inference requests completed successfully",

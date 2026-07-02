@@ -175,8 +175,7 @@ mod tests {
     fn tampered_journal_rejected() {
         let signing_key = SigningKey::generate(&mut OsRng);
         let image_id = [0xAAu8; 32];
-        let mut envelope =
-            build_envelope(&signing_key, &image_id, b"journal", &[0; 64]);
+        let mut envelope = build_envelope(&signing_key, &image_id, b"journal", &[0; 64]);
         // Flip a bit in the journal region.
         let idx = 8 + 32 + 4;
         envelope[idx] ^= 0x01;

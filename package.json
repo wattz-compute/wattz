@@ -2,14 +2,7 @@
   "name": "wattz",
   "version": "0.1.0",
   "private": true,
-  "description": "Wattz -- Solana AI Inference Marketplace. OpenAI-compatible API + TEE verification + Model Registry + Streaming Token-2022 micro payment.",
-  "workspaces": [
-    "packages/sdk-ts",
-    "packages/cli",
-    "packages/streaming-payment",
-    "packages/routing-engine",
-    "packages/model-registry"
-  ],
+  "description": "Wattz -- OpenAI-wire-compatible inference marketplace on Solana. OpenAI-compatible gateway + attestation verification + model registry + Token-2022 streaming settlement.",
   "scripts": {
     "build": "pnpm -r --parallel run build",
     "dev": "pnpm -r --parallel run dev",
@@ -17,7 +10,7 @@
     "typecheck": "pnpm -r --parallel run typecheck",
     "test": "pnpm -r run test",
     "anchor:build": "cd packages/anchor-program && anchor build",
-    "anchor:deploy:mainnet": "cd packages/anchor-program && anchor deploy --provider.cluster mainnet",
+    "anchor:deploy:devnet": "cd packages/anchor-program && anchor deploy --provider.cluster devnet",
     "gateway:build": "cd packages/inference-gateway && cargo build --release",
     "gateway:run": "cd packages/inference-gateway && cargo run --release",
     "node:build": "cd packages/node-runtime && cargo build --release",

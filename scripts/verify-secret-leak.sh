@@ -10,7 +10,7 @@ cd "$ROOT"
 FAIL=0
 
 # 1) Source-tree check: no risky NEXT_PUBLIC_* prefixes.
-if grep -rn -E 'NEXT_PUBLIC_(HELIUS|QUICKNODE|LASERSTREAM|BOT_TOKEN|ANCHOR_KEYPAIR|ANTHROPIC|FAL|TELEGRAM_BOT|RAILWAY|VERCEL)_' \
+if grep -rn -E 'NEXT_PUBLIC_(HELIUS|QUICKNODE|GROQ|BOT_TOKEN|ANCHOR_KEYPAIR|GATEWAY_AUTH|HUGGINGFACE|RAILWAY|VERCEL)_' \
     apps/ packages/ 2>/dev/null | grep -v .example; then
   echo "FAIL: secret env exposed via NEXT_PUBLIC_ prefix"
   FAIL=1

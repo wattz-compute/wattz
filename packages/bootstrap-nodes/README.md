@@ -53,7 +53,7 @@ Example (Runpod):
 ```
 export RUNPOD_API_KEY=...
 export WATTZ_GATEWAY_URL=https://api.wattz.fi
-export WATTZ_MODEL=llama-3-8b-instruct
+export WATTZ_MODEL=llama-3.1-8b-instant
 ./scripts/deploy-runpod.sh
 ```
 

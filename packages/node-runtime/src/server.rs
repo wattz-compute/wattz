@@ -151,7 +151,8 @@ pub async fn chat_completions(
                         .to_str()
                         .map(|_| header::HeaderName::from_static("x-wattz-node"))
                         .unwrap(),
-                    HeaderValue::from_str(&state.config.node_id).unwrap_or(HeaderValue::from_static("unknown")),
+                    HeaderValue::from_str(&state.config.node_id)
+                        .unwrap_or(HeaderValue::from_static("unknown")),
                 );
                 (StatusCode::OK, headers, body).into_response()
             }

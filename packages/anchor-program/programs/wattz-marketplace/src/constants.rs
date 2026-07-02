@@ -56,7 +56,7 @@ pub const PUBLISHER_SHARE_BPS: u64 = 500; // 5 %
 /// Split further into `BURN_RATE_BPS` (burn) and the remainder (treasury).
 pub const PROJECT_FEE_BPS: u64 = 500; // 5 %
 
-/// Portion of the project fee that is burned (buy-back + burn simulation).
+/// Portion of the project fee burned via a direct SPL Token burn CPI.
 pub const BURN_RATE_BPS: u64 = 5_000; // 50 % of project fee = 2.5 % of price
 
 /// Basis point denominator.

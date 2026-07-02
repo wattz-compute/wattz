@@ -6,16 +6,17 @@
 //! * GPU node registration + staking + slashing.
 //! * Model registry (name, version, licence, IPFS pointer, KYC gate).
 //! * Inference receipts submitted by the trusted gateway.
-//! * Settlement with 80/10/5/5 revenue split (immediate / uptime / publisher /
-//!   project fee), with the project fee 50 % burned and 50 % routed to the
-//!   treasury (the on-chain half of the buy-back + burn cycle).
+//! * Settlement with an 80/10/5/5 revenue split (node immediate / node
+//!   pending / publisher / project fee). The project fee is split 50/50: half
+//!   is burned via a direct SPL Token burn CPI (2.5 % of every settled fee)
+//!   and half goes to the treasury.
 //! * Dispute open / resolve flow with reputation deltas.
 //! * Uptime reward pool claim.
 //!
-//! Currently deployed on devnet at
+//! Deployed on devnet at
 //! `GUDVbE4Jgmtu8jgxUVtq2wUmjdLxJzPqT3zET2EdTLiU`; localnet tests live under
-//! `tests/wattz-marketplace.ts`. Mainnet deployment reuses the same program
-//! id -- `anchor keys sync` before switching clusters.
+//! `tests/wattz-marketplace.ts`. Redeploying under a new keypair requires
+//! `anchor keys sync` to re-align `declare_id!` and Anchor.toml.
 
 #![allow(clippy::result_large_err)]
 

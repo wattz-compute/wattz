@@ -37,7 +37,10 @@ impl InferenceBackend for TgiBackend {
     }
 
     async fn chat_completion(&self, req: &ChatRequest) -> Result<ChatCompletion> {
-        let url = format!("{}/v1/chat/completions", self.base_url.trim_end_matches('/'));
+        let url = format!(
+            "{}/v1/chat/completions",
+            self.base_url.trim_end_matches('/')
+        );
         let mut body = serde_json::to_value(req)?;
         if let Some(obj) = body.as_object_mut() {
             obj.insert("stream".into(), serde_json::Value::Bool(false));
@@ -62,7 +65,10 @@ impl InferenceBackend for TgiBackend {
         &self,
         req: &ChatRequest,
     ) -> Result<BoxStream<'static, Result<Bytes>>> {
-        let url = format!("{}/v1/chat/completions", self.base_url.trim_end_matches('/'));
+        let url = format!(
+            "{}/v1/chat/completions",
+            self.base_url.trim_end_matches('/')
+        );
         let mut body = serde_json::to_value(req)?;
         if let Some(obj) = body.as_object_mut() {
             obj.insert("stream".into(), serde_json::Value::Bool(true));
@@ -112,7 +118,9 @@ impl InferenceBackend for TgiBackend {
                 return Ok(out);
             }
         }
-        Err(anyhow!("tgi backend does not expose an embeddings endpoint"))
+        Err(anyhow!(
+            "tgi backend does not expose an embeddings endpoint"
+        ))
     }
 
     async fn list_models(&self) -> Result<Vec<String>> {
@@ -130,10 +138,9 @@ impl InferenceBackend for TgiBackend {
         struct Info {
             model_id: String,
         }
-        let info: Info = resp
-            .json()
-            .await
-            .unwrap_or(Info { model_id: String::new() });
+        let info: Info = resp.json().await.unwrap_or(Info {
+            model_id: String::new(),
+        });
         Ok(if info.model_id.is_empty() {
             vec![]
         } else {

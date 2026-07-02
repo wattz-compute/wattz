@@ -41,13 +41,13 @@ wattz version            Print CLI and SDK versions.
 ## First run
 
 ```bash
-wattz node init --region self-hosted --model llama-3-8b-instruct
+wattz node init --region self-hosted --model llama-3.1-8b-instant
 # writes:
 #   ~/.wattz/config.json
 #   ~/.wattz/keypair.json (Solana operator identity)
 
 # Ensure Ollama is installed and the model is pulled:
-ollama pull llama3:8b-instruct-q4_K_M
+ollama pull llama3.1:8b
 
 wattz node start
 # Local proxy on 0.0.0.0:8081 that speaks the OpenAI Chat/Completions schema
@@ -57,36 +57,36 @@ wattz node start
 ## Inference from the terminal
 
 ```bash
-wattz infer --model llama-3-8b-instruct --prompt "Explain TEE attestation."
-wattz infer --model llama-3-8b-instruct --prompt "Stream me a haiku." --stream
-echo "prompt from stdin" | wattz infer --model llama-3-8b-instruct
+wattz infer --model llama-3.1-8b-instant --prompt "Explain TEE attestation."
+wattz infer --model llama-3.1-8b-instant --prompt "Stream me a haiku." --stream
+echo "prompt from stdin" | wattz infer --model llama-3.1-8b-instant
 ```
 
 ## Publish a model manifest
 
-`manifests/llama-3-8b.yaml`:
+`manifests/llama-3.1-8b.yaml`:
 
 ```yaml
-id: llama-3-8b-instruct
+id: llama-3.1-8b-instant
 family: llama
 parameters_b: 8
-context_window: 8192
+context_window: 131072
 modality: text
 license:
-  spdx: Llama-3
-  name: Meta Llama 3 Community License
+  spdx: Llama-3.1
+  name: Llama 3.1 Community License
   commercial: true
   kyc_required: false
-  upstream_url: https://llama.meta.com/llama3/license
-price_per_1k_prompt: 30
-price_per_1k_completion: 90
+  upstream_url: https://www.llama.com/llama3_1/license/
+price_per_1k_prompt: 50
+price_per_1k_completion: 100
 supported_regions: [us-east-1, eu-west-1, ap-south-1]
 min_gpu_vram_gb: 24
 ```
 
 ```bash
-wattz model publish --file manifests/llama-3-8b.yaml --dry-run
-wattz model publish --file manifests/llama-3-8b.yaml
+wattz model publish --file manifests/llama-3.1-8b.yaml --dry-run
+wattz model publish --file manifests/llama-3.1-8b.yaml
 ```
 
 ## Stake and claim

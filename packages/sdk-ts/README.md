@@ -25,7 +25,7 @@ const wattz = new WattzClient({
 });
 
 const res = await wattz.chat.completions.create({
-  model: 'llama-3-8b-instruct',
+  model: 'llama-3.1-8b-instant',
   messages: [{ role: 'user', content: 'Explain TEE attestation in one line.' }],
 });
 
@@ -37,7 +37,7 @@ console.log('served by node:', res.wattz?.node_pubkey);
 
 ```ts
 const stream = wattz.chat.completions.create({
-  model: 'llama-3-8b-instruct',
+  model: 'llama-3.1-8b-instant',
   messages: [{ role: 'user', content: 'Stream a haiku.' }],
   stream: true,
 });
@@ -54,7 +54,7 @@ for await (const chunk of stream) {
 | `chat.completions` | `POST /v1/chat/completions`     | Chat completions, streaming or one-shot        |
 | `embeddings`      | `POST /v1/embeddings`           | Sentence embeddings (bge, gte, mxbai, ...)     |
 | `images`          | `POST /v1/images/generations`   | SDXL / SD1.5 / Flux image generation           |
-| `models`          | `GET /v1/models`                | Model registry (Llama, Mistral, SD, Whisper)   |
+| `models`          | `GET /v1/models`                | Model registry (Llama, GPT-OSS, SDXL, Whisper) |
 | `nodes`           | `GET /v1/nodes`                 | Active GPU node fleet with attestation metadata |
 
 ## Errors
@@ -95,7 +95,7 @@ Every response includes an optional `wattz` object with:
 
 - `node_pubkey` and `operator` (Solana pubkeys)
 - `region` (routing region label)
-- `attestation_kind` (`sgx`, `sev`, `nvidia_cc`, `risc0`, `sp1`, or `none`)
+- `attestation_kind` (`relay` on the bootstrap path; `sgx`, `sev`, `nvidia_cc`, `risc0`, `sp1`, or `none` on the node path)
 - `attestation_hash` (TEE quote hash or ZK proof hash)
 - `price_lamports` (paid amount for the request)
 - `settlement_signature` (Solana tx signature once settlement lands)

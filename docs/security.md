@@ -1,7 +1,8 @@
 # Wattz Security Notes
 
-Public disclosures should go to `security@wattz.fi`. GPG public key is
-published under `docs/security.pgp` (added at launch).
+Report vulnerabilities privately to `security@wattz.fi`. Please do not open a
+public issue for a suspected vulnerability. See the root `SECURITY.md` for the
+short contact summary.
 
 ## Threat Model
 
@@ -25,17 +26,16 @@ Attackers:
 
 ## Secrets Handling
 
-- `HELIUS_RPC_URL`, `HELIUS_WS_URL`, `LASERSTREAM_KEY`, `ANCHOR_KEYPAIR`,
-  `TELEGRAM_BOT_TOKEN`, and any `_API_KEY` variables are server-side only.
-- The Next.js apps only expose the `NEXT_PUBLIC_SOLANA_RPC` (a public
-  RPC endpoint) and functional feature flags. A CI grep (see
-  `.github/workflows/no-secret-leak.yml`) fails the pipeline if
-  `helius-rpc.com/?api-key=` or `quicknode` appears in any `.next/`
-  build artifact.
-- All Solana wallet interactions in the browser go through the wallet
-  adapter and the public RPC. DAS / getAsset / getAssetProof / Enhanced
-  API calls are proxied through the Next.js Route Handlers at
-  `/api/das/*`.
+- `HELIUS_RPC_URL`, `HELIUS_WS_URL`, `GROQ_API_KEY`, `ANCHOR_KEYPAIR`, and any
+  `_API_KEY` / `_TOKEN` variables are server-side only.
+- The Next.js apps only expose `NEXT_PUBLIC_SOLANA_RPC` (a public RPC
+  endpoint) and functional flags. `scripts/verify-secret-leak.sh`, run by CI
+  (`.github/workflows/ci.yml`), fails the pipeline if a `NEXT_PUBLIC_` secret
+  prefix is introduced or if `helius-rpc.com/?api-key=` / `quicknode` appears
+  in any `.next/` build artifact.
+- All Solana wallet interactions in the browser go through the wallet adapter
+  and the public RPC. Keyed RPC calls are proxied through the Next.js Route
+  Handlers, never made directly from the client.
 
 ## CORS
 

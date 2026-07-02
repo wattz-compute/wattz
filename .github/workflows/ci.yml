@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: rust (fmt + check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install rustfmt
+        run: rustup component add rustfmt
+      - name: Format check
+        run: cargo fmt --check -p wattz-compute-verifier -p wattz-node-runtime
+      - name: Type check
+        run: cargo check -p wattz-compute-verifier -p wattz-node-runtime
+
+  ts:
+    name: typescript (typecheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.6.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Typecheck packages
+        run: >-
+          pnpm
+          --filter @wattz/sdk
+          --filter @wattz/model-registry
+          --filter @wattz/routing-engine
+          --filter @wattz/streaming-payment
+          typecheck
+
+  guards:
+    name: guards (placeholder + secrets + tone)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No placeholders
+        run: bash scripts/verify-no-placeholder.sh
+      - name: No leaked secrets
+        run: bash scripts/verify-secret-leak.sh
+      - name: Tone and cluster claims
+        run: bash scripts/verify-tone.sh

@@ -36,7 +36,10 @@ impl InferenceBackend for VllmBackend {
     }
 
     async fn chat_completion(&self, req: &ChatRequest) -> Result<ChatCompletion> {
-        let url = format!("{}/v1/chat/completions", self.base_url.trim_end_matches('/'));
+        let url = format!(
+            "{}/v1/chat/completions",
+            self.base_url.trim_end_matches('/')
+        );
         let mut body = serde_json::to_value(req)?;
         if let Some(obj) = body.as_object_mut() {
             obj.insert("stream".into(), serde_json::Value::Bool(false));
@@ -51,7 +54,11 @@ impl InferenceBackend for VllmBackend {
         if !resp.status().is_success() {
             let status = resp.status();
             let text = resp.text().await.unwrap_or_default();
-            return Err(anyhow!("vllm chat completion failed ({}): {}", status, text));
+            return Err(anyhow!(
+                "vllm chat completion failed ({}): {}",
+                status,
+                text
+            ));
         }
         let out: ChatCompletion = resp.json().await.context("decode vllm response")?;
         Ok(out)
@@ -61,7 +68,10 @@ impl InferenceBackend for VllmBackend {
         &self,
         req: &ChatRequest,
     ) -> Result<BoxStream<'static, Result<Bytes>>> {
-        let url = format!("{}/v1/chat/completions", self.base_url.trim_end_matches('/'));
+        let url = format!(
+            "{}/v1/chat/completions",
+            self.base_url.trim_end_matches('/')
+        );
         let mut body = serde_json::to_value(req)?;
         if let Some(obj) = body.as_object_mut() {
             obj.insert("stream".into(), serde_json::Value::Bool(true));
