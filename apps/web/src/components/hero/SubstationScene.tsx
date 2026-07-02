@@ -15,19 +15,16 @@ import {
   vertexShader as wireVertex,
   fragmentShader as wireFragment,
 } from './shaders/wireGlow.glsl';
-import { palette, paletteRgb } from '@/lib/palette';
+import { palette } from '@/lib/palette';
+import { cn } from '@/lib/cn';
 
 const TRANSFORMERS = [
-  { label: 'Llama 3', color: '#5BC0EB', position: [-6, 0, 1] as [number, number, number], tflops: 82 },
-  { label: 'Mistral', color: '#93D8F2', position: [-2.4, 0, -1.4] as [number, number, number], tflops: 41 },
-  { label: 'Stable Diffusion', color: '#D4AF37', position: [1.4, 0, -0.8] as [number, number, number], tflops: 66 },
-  { label: 'Whisper', color: '#F0EAD6', position: [4.6, 0, 1.2] as [number, number, number], tflops: 18 },
-  { label: 'GPT-OSS', color: '#FFD93D', position: [7.6, 0, -0.4] as [number, number, number], tflops: 54 },
+  { label: 'Llama 3.1 8B', color: '#5BC0EB', position: [-6, 0, 1] as [number, number, number], status: 'relay' },
+  { label: 'Llama 3.3 70B', color: '#93D8F2', position: [-2.4, 0, -1.4] as [number, number, number], status: 'relay' },
+  { label: 'GPT-OSS 20B', color: '#FFD93D', position: [1.4, 0, -0.8] as [number, number, number], status: 'relay' },
+  { label: 'Whisper v3', color: '#F0EAD6', position: [4.6, 0, 1.2] as [number, number, number], status: 'awaiting node' },
+  { label: 'SDXL', color: '#D4AF37', position: [7.6, 0, -0.4] as [number, number, number], status: 'awaiting node' },
 ] as const;
-
-function palRgbNormalized(rgb: readonly number[]): THREE.Vector3 {
-  return new THREE.Vector3(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
-}
 
 // Bezier path between two 3D points, with vertical arch.
 function bezierPoints(a: THREE.Vector3, b: THREE.Vector3, count: number, arch: number) {
@@ -45,22 +42,27 @@ function bezierPoints(a: THREE.Vector3, b: THREE.Vector3, count: number, arch: n
   return { points, curve };
 }
 
+// Disable raycast on decorative meshes -- hover is decided by screen-space
+// zones on the Canvas element, not by 3D pointer events. Pointer hits inside
+// the scene are ignored entirely so the transformer can scale without the
+// hit region ever shifting under the cursor.
+const NO_RAYCAST: THREE.Object3D['raycast'] = () => {};
+
 function Transformer({
   label,
   color,
   position,
-  onHover,
   isHovered,
-  tflops,
+  status,
 }: {
   label: string;
   color: string;
   position: [number, number, number];
-  onHover: (label: string | null) => void;
   isHovered: boolean;
-  tflops: number;
+  status: string;
 }) {
   const groupRef = useRef<THREE.Group>(null);
+  const innerScaleRef = useRef<THREE.Group>(null);
   const insulatorMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -95,76 +97,136 @@ function Transformer({
     if (!groupRef.current) return;
     const t = clock.getElapsedTime();
     const y = Math.sin(t * 1.4 + position[0]) * 0.03;
+    // Only the outer group bobs. Its scale stays fixed at 1 so the hit target
+    // (a child of this group) never grows or moves during a hover.
     groupRef.current.position.y = position[1] + y;
-    const targetScale = isHovered ? 1.06 : 1;
-    groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+    if (innerScaleRef.current) {
+      const targetScale = isHovered ? 1.06 : 1;
+      innerScaleRef.current.scale.lerp(
+        new THREE.Vector3(targetScale, targetScale, targetScale),
+        0.08,
+      );
+    }
   });
 
   return (
-    <group
-      ref={groupRef}
-      position={position}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        onHover(label);
-        document.body.style.cursor = 'pointer';
-      }}
-      onPointerOut={(e) => {
-        e.stopPropagation();
-        onHover(null);
-        document.body.style.cursor = '';
-      }}
-    >
-      {/* Concrete pad */}
-      <mesh receiveShadow position={[0, -0.55, 0]}>
-        <boxGeometry args={[3.4, 0.15, 2.4]} />
-        <meshStandardMaterial color={palette.steel} metalness={0.4} roughness={0.85} />
-      </mesh>
-      {/* Main transformer tank */}
-      <mesh castShadow position={[0, 0.5, 0]} material={shellMat}>
-        <boxGeometry args={[2.4, 2, 1.6]} />
-      </mesh>
-      {/* Cooling fins */}
-      {Array.from({ length: 6 }).map((_, i) => (
-        <mesh key={`fin-${i}`} position={[1.28, 0.5, -0.6 + i * 0.24]} material={shellMat}>
-          <boxGeometry args={[0.14, 1.6, 0.06]} />
+    <group ref={groupRef} position={position}>
+      {/* Visible content — scales on hover. Every mesh opts out of raycasting;
+          hover is decided at Canvas level from the mouse X position. */}
+      <group ref={innerScaleRef}>
+        {/* Concrete pad */}
+        <mesh receiveShadow position={[0, -0.55, 0]} raycast={NO_RAYCAST}>
+          <boxGeometry args={[3.4, 0.15, 2.4]} />
+          <meshStandardMaterial color={palette.steel} metalness={0.4} roughness={0.85} />
         </mesh>
-      ))}
-      {/* Insulators / bushings */}
-      <group position={[0, 1.55, 0]}>
-        {[-0.7, 0, 0.7].map((x) => (
-          <group key={`ins-${x}`} position={[x, 0, 0]}>
-            <mesh material={insulatorMat} position={[0, 0.4, 0]}>
-              <cylinderGeometry args={[0.09, 0.11, 0.8, 12]} />
-            </mesh>
-            <mesh material={coilMat} position={[0, 0.86, 0]}>
-              <sphereGeometry args={[0.15, 14, 14]} />
-            </mesh>
-          </group>
+        {/* Main transformer tank */}
+        <mesh castShadow position={[0, 0.5, 0]} material={shellMat} raycast={NO_RAYCAST}>
+          <boxGeometry args={[2.4, 2, 1.6]} />
+        </mesh>
+        {/* Cooling fins */}
+        {Array.from({ length: 6 }).map((_, i) => (
+          <mesh
+            key={`fin-${i}`}
+            position={[1.28, 0.5, -0.6 + i * 0.24]}
+            material={shellMat}
+            raycast={NO_RAYCAST}
+          >
+            <boxGeometry args={[0.14, 1.6, 0.06]} />
+          </mesh>
         ))}
+        {/* Insulators / bushings */}
+        <group position={[0, 1.55, 0]}>
+          {[-0.7, 0, 0.7].map((x) => (
+            <group key={`ins-${x}`} position={[x, 0, 0]}>
+              <mesh material={insulatorMat} position={[0, 0.4, 0]} raycast={NO_RAYCAST}>
+                <cylinderGeometry args={[0.09, 0.11, 0.8, 12]} />
+              </mesh>
+              <mesh material={coilMat} position={[0, 0.86, 0]} raycast={NO_RAYCAST}>
+                <sphereGeometry args={[0.15, 14, 14]} />
+              </mesh>
+            </group>
+          ))}
+        </group>
+        {/* Colored accent ring under the transformer */}
+        <mesh position={[0, -0.35, 0.86]} raycast={NO_RAYCAST}>
+          <ringGeometry args={[0.32, 0.36, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.85} />
+        </mesh>
+        <Html position={[0, -0.9, 0.86]} center distanceFactor={7}>
+          <div className="pointer-events-none flex flex-col items-center gap-1">
+            <div
+              className="font-mono-tech text-[10px] uppercase tracking-[0.24em]"
+              style={{ color: palette.clusterWhite }}
+            >
+              {label}
+            </div>
+            <div className="font-mono-tech text-[9px]" style={{ color: palette.fogGrey }}>
+              {status}
+            </div>
+          </div>
+        </Html>
       </group>
-      {/* Label ring */}
-      <mesh position={[0, -0.35, 0.86]}>
-        <ringGeometry args={[0.32, 0.36, 32]} />
-        <meshBasicMaterial color={color} transparent opacity={0.85} />
-      </mesh>
-      <Html position={[0, -0.9, 0.86]} center distanceFactor={7}>
-        <div className="pointer-events-none flex flex-col items-center gap-1">
-          <div
-            className="font-mono-tech text-[10px] uppercase tracking-[0.24em]"
-            style={{ color: palette.clusterWhite }}
-          >
-            {label}
-          </div>
-          <div
-            className="font-mono-tech text-[9px]"
-            style={{ color: palette.fogGrey }}
-          >
-            {tflops} TFLOPS
-          </div>
-        </div>
-      </Html>
     </group>
+  );
+}
+
+// Screen-space hover overlay: five glassmorphic strips clustered in the middle
+// of the viewport. Each strip carries the transformer's name and drives the
+// scene's hover state via plain DOM enter/leave events.
+function HoverStrips({
+  hovered,
+  setHovered,
+}: {
+  hovered: string | null;
+  setHovered: (label: string | null) => void;
+}) {
+  return (
+    <div className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex">
+      <div
+        className="pointer-events-auto grid h-[38%] w-[64%] max-w-[820px] min-w-[420px] gap-2"
+        style={{ gridTemplateColumns: `repeat(${TRANSFORMERS.length}, 1fr)` }}
+        onMouseLeave={() => setHovered(null)}
+      >
+        {TRANSFORMERS.map((t) => {
+          const active = hovered === t.label;
+          return (
+            <button
+              key={t.label}
+              type="button"
+              onMouseEnter={() => setHovered(t.label)}
+              onFocus={() => setHovered(t.label)}
+              className="group relative flex flex-col items-center justify-end overflow-hidden rounded-lg border transition-colors duration-200"
+              style={{
+                borderColor: active ? 'rgba(240,234,214,0.24)' : 'rgba(240,234,214,0.08)',
+                backgroundColor: active ? 'rgba(91,192,235,0.06)' : 'rgba(10,14,39,0.10)',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+              }}
+            >
+              <span
+                className="mb-4 font-mono-tech uppercase tracking-[0.28em] transition-opacity duration-200"
+                style={{
+                  fontSize: '11px',
+                  color: active ? 'rgba(240,234,214,0.92)' : 'rgba(240,234,214,0.55)',
+                  textShadow: active ? '0 0 12px rgba(91,192,235,0.35)' : 'none',
+                }}
+              >
+                {t.label}
+              </span>
+              <span
+                aria-hidden
+                className="absolute inset-x-4 bottom-2 h-px transition-opacity duration-200"
+                style={{
+                  backgroundColor: t.color,
+                  opacity: active ? 0.7 : 0.2,
+                  boxShadow: active ? `0 0 8px ${t.color}` : 'none',
+                }}
+              />
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -399,7 +461,15 @@ function CameraRig({ hovered }: { hovered: string | null }) {
           onUpdate: () => camera.lookAt(target.position[0], 0.8, target.position[2]),
         });
       }
+    } else {
+      // Hover released: stop the focus tween before the orbit lerp resumes so
+      // the two never fight over camera.position.
+      tweenRef.current?.kill();
+      tweenRef.current = null;
     }
+    return () => {
+      tweenRef.current?.kill();
+    };
   }, [hovered, camera]);
 
   useFrame((_, delta) => {
@@ -417,10 +487,17 @@ function CameraRig({ hovered }: { hovered: string | null }) {
   return null;
 }
 
-function SubstationInterior({ onHoverTransformer, hoveredLabel }: { onHoverTransformer: (l: string | null) => void; hoveredLabel: string | null }) {
+function SubstationInterior({
+  hoveredLabel,
+  particleScale,
+}: {
+  hoveredLabel: string | null;
+  particleScale: number;
+}) {
   const busbarY = 4.2;
   const busbarStart = new THREE.Vector3(-8, busbarY, -3.4);
   const busbarEnd = new THREE.Vector3(8.5, busbarY, -3.4);
+  const scale = (n: number) => Math.max(20, Math.round(n * particleScale));
 
   return (
     <group>
@@ -442,7 +519,7 @@ function SubstationInterior({ onHoverTransformer, hoveredLabel }: { onHoverTrans
         from={busbarStart}
         to={busbarEnd}
         arch={0.4}
-        particleCount={520}
+        particleCount={scale(520)}
         color={palette.cyanGlow}
         warm={palette.wireGlow}
       />
@@ -454,15 +531,14 @@ function SubstationInterior({ onHoverTransformer, hoveredLabel }: { onHoverTrans
             label={t.label}
             color={t.color}
             position={t.position}
-            tflops={t.tflops}
+            status={t.status}
             isHovered={hoveredLabel === t.label}
-            onHover={onHoverTransformer}
           />
           <ElectricFlow
             from={new THREE.Vector3(t.position[0], busbarY, -3.4)}
             to={new THREE.Vector3(t.position[0], 2.1, t.position[2])}
             arch={0.6}
-            particleCount={120}
+            particleCount={scale(120)}
             color={t.color}
             warm={palette.accentGold}
           />
@@ -478,7 +554,7 @@ function SubstationInterior({ onHoverTransformer, hoveredLabel }: { onHoverTrans
             from={new THREE.Vector3(t.position[0], 1.6, t.position[2])}
             to={new THREE.Vector3(targetX, 4.5, 16)}
             arch={3.6 + i * 0.4}
-            particleCount={220}
+            particleCount={scale(220)}
             color={t.color}
             warm={palette.cyanGlow}
           />
@@ -522,20 +598,60 @@ function mulberry32(a: number) {
   };
 }
 
+// Scale render cost to the device. Weak CPUs/GPUs get a lower dpr ceiling and
+// thinner particle streams; a prefers-reduced-motion user gets a single static
+// frame instead of the continuous orbit.
+function detectTier(): { maxDpr: number; particleScale: number; reducedMotion: boolean } {
+  if (typeof navigator === 'undefined') {
+    return { maxDpr: 1.5, particleScale: 1, reducedMotion: false };
+  }
+  const cores = navigator.hardwareConcurrency || 4;
+  const mem = (navigator as { deviceMemory?: number }).deviceMemory ?? 4;
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+  let maxDpr = 1.7;
+  let particleScale = 1;
+  if (cores <= 4 || mem <= 4) {
+    maxDpr = 1.3;
+    particleScale = 0.55;
+  }
+  if (cores <= 2 || mem <= 2) {
+    maxDpr = 1;
+    particleScale = 0.32;
+  }
+  return { maxDpr, particleScale, reducedMotion };
+}
+
 export default function SubstationScene() {
   const [hovered, setHovered] = useState<string | null>(null);
-  const cyanRgb = paletteRgb.cyanGlow;
-  const goldRgb = paletteRgb.accentGold;
-  const cyanVec = palRgbNormalized(cyanRgb);
-  const goldVec = palRgbNormalized(goldRgb);
-  // Reference the vectors to keep tree-shakers from dropping palRgbNormalized.
-  void cyanVec;
-  void goldVec;
+  const [tier] = useState(detectTier);
+  const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (!sessionStorage.getItem('wattz-hover-hint')) setShowHint(true);
+    } catch {
+      setShowHint(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hovered && showHint) {
+      setShowHint(false);
+      try {
+        sessionStorage.setItem('wattz-hover-hint', '1');
+      } catch {
+        // Session storage unavailable; the hint just won't persist.
+      }
+    }
+  }, [hovered, showHint]);
 
   return (
-    <div className="pointer-events-auto relative h-[92vh] min-h-[620px] w-full overflow-hidden">
+    <div className="pointer-events-auto relative h-[55vh] min-h-[380px] w-full overflow-hidden md:h-[92vh] md:min-h-[620px]">
       <Canvas
-        dpr={[1, 1.7]}
+        dpr={[1, tier.maxDpr]}
+        frameloop={tier.reducedMotion ? 'demand' : 'always'}
         shadows={false}
         gl={{
           antialias: true,
@@ -555,7 +671,7 @@ export default function SubstationScene() {
           <GroundGrid />
           <GridLines />
           <DistantCity />
-          <SubstationInterior onHoverTransformer={setHovered} hoveredLabel={hovered} />
+          <SubstationInterior hoveredLabel={hovered} particleScale={tier.particleScale} />
         </Suspense>
         <CameraRig hovered={hovered} />
         <EffectComposer multisampling={0}>
@@ -571,6 +687,15 @@ export default function SubstationScene() {
         </EffectComposer>
       </Canvas>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-night-deep/60 to-night-deep" />
+      <div
+        className={cn(
+          'pointer-events-none absolute bottom-32 left-6 z-10 hidden font-mono-tech text-[10px] uppercase tracking-[0.24em] text-cluster-white/45 transition-opacity duration-700 lg:block',
+          showHint ? 'opacity-100' : 'opacity-0',
+        )}
+      >
+        hover a transformer to inspect the load
+      </div>
+      <HoverStrips hovered={hovered} setHovered={setHovered} />
     </div>
   );
 }

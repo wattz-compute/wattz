@@ -24,6 +24,31 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://wattz.fi';
+const twitterHandle = process.env.NEXT_PUBLIC_TWITTER || 'wattzfi';
+const githubRepo = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      name: 'Wattz',
+      url: siteUrl,
+      logo: `${siteUrl}/logo.svg`,
+      description:
+        'Solana-native AI inference marketplace with an OpenAI-compatible API.',
+      sameAs: [
+        `https://x.com/${twitterHandle}`,
+        `https://github.com/${githubRepo}`,
+      ],
+    },
+    {
+      '@type': 'WebSite',
+      name: 'Wattz',
+      url: siteUrl,
+    },
+  ],
+};
 
 export const metadata: Metadata = {
   title: {
@@ -50,7 +75,7 @@ export const metadata: Metadata = {
       'Solana AI inference marketplace. OpenAI-compatible API, TEE-verified compute, PDA model registry, Token-2022 streaming payments.',
     url: siteUrl,
     siteName: 'Wattz',
-    images: [{ url: '/og.svg', width: 1200, height: 630, alt: 'Wattz' }],
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Wattz' }],
     locale: 'en_US',
     type: 'website',
   },
@@ -59,8 +84,9 @@ export const metadata: Metadata = {
     title: 'Wattz -- Power the inference.',
     description:
       'Solana AI inference marketplace. OpenAI-compatible API, TEE verification, model registry, streaming Token-2022 payments.',
-    creator: `@${process.env.NEXT_PUBLIC_TWITTER || 'wattzfi'}`,
-    images: ['/og.svg'],
+    site: `@${twitterHandle}`,
+    creator: `@${twitterHandle}`,
+    images: ['/og.png'],
   },
   icons: {
     icon: '/favicon.svg',
@@ -82,6 +108,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${spaceMono.variable} ${jetbrainsMono.variable}`}
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Providers>
           {children}
           <BackgroundMusic />

@@ -4,8 +4,12 @@ import { SafeLink } from '@/components/layout/SafeLink';
 import { Chip } from '@/components/ui/Chip';
 
 const twitter = process.env.NEXT_PUBLIC_TWITTER || 'wattzfi';
-const github =
-  process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
+const github = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
+const programId = process.env.NEXT_PUBLIC_2_PROGRAM_ID || '';
+const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER || 'devnet';
+const explorerHref = programId
+  ? `https://explorer.solana.com/address/${programId}?cluster=${cluster}`
+  : 'https://explorer.solana.com/';
 
 export function CtaSection() {
   return (
@@ -19,12 +23,16 @@ export function CtaSection() {
                 Try one inference. Then swap your OpenAI baseURL.
               </h2>
               <p className="text-base leading-7 text-cluster-white/70">
-                The playground streams Llama 3 through a live gateway. When you
-                are ready, point your existing OpenAI SDK at{' '}
+                The playground streams live from the gateway at{' '}
                 <code className="font-mono-tech text-cluster-white">
                   https://api.wattz.fi/v1
-                </code>{' '}
-                and keep every OpenAI call you already have.
+                </code>
+                . Point your existing OpenAI SDK at the same base URL and keep
+                every call you already have.
+              </p>
+              <p className="max-w-xl font-mono-tech text-xs leading-6 text-cluster-white/45">
+                Inference is relayed through Groq LPU capacity until the first
+                bare-metal node registers. The wire protocol does not change.
               </p>
               <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
                 <SafeLink href="/playground">
@@ -46,9 +54,13 @@ export function CtaSection() {
                 <MicroLink
                   label="GitHub"
                   href={`https://github.com/${github}`}
-                  hint="wattz-inference-gateway"
+                  hint={github.split('/').pop() || 'wattz'}
                 />
-                <MicroLink label="Explorer" href="https://explorer.solana.com/" hint="Anchor 0.31" />
+                <MicroLink
+                  label="Explorer"
+                  href={explorerHref}
+                  hint={programId ? `program ${programId.slice(0, 4)}...${programId.slice(-4)}` : 'Anchor 0.31'}
+                />
                 <MicroLink label="Operator" href="/operator" hint="Node onboarding" />
               </div>
             </div>

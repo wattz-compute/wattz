@@ -6,7 +6,16 @@ const flow = [
   {
     step: '01',
     title: 'Client calls /v1/chat/completions',
-    body: 'Existing OpenAI SDKs just swap `baseURL`. No new client library required. Streaming responses ride the same SSE contract as OpenAI.',
+    body: (
+      <>
+        Existing OpenAI SDKs just swap{' '}
+        <code className="rounded bg-night/70 px-1.5 py-0.5 font-mono-tech text-[0.85em] text-cyan-glow">
+          baseURL
+        </code>
+        . No new client library required. Streaming responses ride the same SSE
+        contract as OpenAI.
+      </>
+    ),
   },
   {
     step: '02',
@@ -21,7 +30,7 @@ const flow = [
   {
     step: '04',
     title: 'Token-2022 streams payment',
-    body: 'Per-token cost is settled through a Token-2022 transfer hook, meter by meter. Refunds and disputes settle on Anchor mainnet.',
+    body: 'Per-token cost is settled through a Token-2022 transfer hook, meter by meter. Refunds and disputes settle through the Anchor settlement program (devnet today).',
   },
   {
     step: '05',
@@ -31,7 +40,7 @@ const flow = [
   {
     step: '06',
     title: 'Bootstrap nodes keep the grid warm',
-    body: 'Wattz operates its own RTX 4090 and H100 nodes so builders never hit a cold marketplace. Consumer + DC fleets converge in one pool.',
+    body: 'Bootstrap capacity keeps the grid warm. Today that is a Groq LPU relay; Wattz-operated bare-metal nodes join the pool as they come online.',
   },
 ];
 

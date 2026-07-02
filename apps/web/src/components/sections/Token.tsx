@@ -1,11 +1,12 @@
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
+import { CopyAddress } from '@/components/ui/CopyAddress';
 import { projectCa } from '@/lib/solana';
 
 const distribution = [
   { name: 'Node operators', value: 34, description: 'Long-tail rewards + slashing bond' },
-  { name: 'Model hosters', value: 18, description: 'Publish Llama, Mistral, and community models' },
+  { name: 'Model hosters', value: 18, description: 'Publish Llama, GPT-OSS, and community models' },
   { name: 'Treasury', value: 20, description: 'Bootstrap nodes, grants, security audits' },
   { name: 'Public sale', value: 14, description: 'On-chain public tranche via Anchor' },
   { name: 'Team / Contributors', value: 8, description: 'Four-year vesting, one-year cliff' },
@@ -14,8 +15,8 @@ const distribution = [
 
 const utilities = [
   {
-    title: '50% inference fee buyback burn',
-    body: 'Half of every settled inference fee is used to market-buy $WATTZ and burn. The rest funds nodes, hosters, and treasury.',
+    title: 'Fee burn on every settlement',
+    body: 'Each settled inference splits its fee 80/10/5/5 across node, node pending, model publisher, and project. Half of the project fee -- 2.5% of every settled fee -- is burned through a direct SPL Token Burn CPI.',
   },
   {
     title: 'Node staking + slashing',
@@ -49,15 +50,17 @@ export function TokenSection() {
             </p>
 
             {ca ? (
-              <div className="mt-8 flex flex-wrap items-center gap-3">
-                <Chip tone="gold">CA</Chip>
-                <code className="font-mono-tech text-xs text-cluster-white/85">{ca}</code>
+              <div className="mt-8 flex flex-col gap-3">
+                <Chip tone="gold">$WATTZ CA</Chip>
+                <CopyAddress address={ca} />
               </div>
             ) : (
               <div className="mt-8">
                 <Chip tone="muted">CA reveals at launch</Chip>
               </div>
             )}
+
+            <FeeFlow />
 
             <div className="mt-10 space-y-4">
               {utilities.map((u) => (
@@ -128,6 +131,100 @@ function MetaRow({ label, value }: { label: string; value: string }) {
         {label}
       </div>
       <div className="font-mono-tech text-sm text-cluster-white">{value}</div>
+    </div>
+  );
+}
+
+const CYAN = '#5BC0EB';
+const GOLD = '#D4AF37';
+const WIRE = '#FFD93D';
+
+// Busbar-style diagram of how a single settled fee is split on-chain, with the
+// burn leg drawn as half of the project fee. Values mirror the anchor program.
+function FeeFlow() {
+  const legs = [
+    { cx: 96, pct: '80%', label: 'node', color: CYAN, softColor: 'rgba(91,192,235,0.55)' },
+    { cx: 248, pct: '10%', label: 'node pending', color: 'rgba(91,192,235,0.55)', softColor: 'rgba(91,192,235,0.4)' },
+    { cx: 400, pct: '5%', label: 'model publisher', color: GOLD, softColor: 'rgba(212,175,55,0.5)' },
+    { cx: 552, pct: '5%', label: 'project fee', color: GOLD, softColor: 'rgba(212,175,55,0.5)' },
+  ];
+
+  return (
+    <div className="mt-8 rounded-xl border border-cyan-glow/10 bg-night-deep/40 p-4">
+      <div className="font-mono-tech text-[10px] uppercase tracking-[0.24em] text-cluster-white/55">
+        Per-settlement fee routing
+      </div>
+      <svg
+        viewBox="0 0 640 178"
+        className="mt-3 w-full"
+        role="img"
+        aria-label="Each settled fee splits into node 80 percent, node pending 10 percent, model publisher 5 percent, and project 5 percent. Half of the project fee, 2.5 percent, is burned."
+      >
+        {/* Incoming busbar carrying 100% of the settled fee */}
+        <text x="24" y="15" className="font-mono-tech" fill="#F0EAD6" fillOpacity="0.7" fontSize="10">
+          settled fee 100%
+        </text>
+        <line x1="24" y1="28" x2="616" y2="28" stroke={CYAN} strokeOpacity="0.5" strokeWidth="2" />
+        <circle cx="24" cy="28" r="3" fill={CYAN} />
+
+        {legs.map((leg) => (
+          <g key={leg.label}>
+            <circle cx={leg.cx} cy="28" r="2.5" fill={leg.softColor} />
+            <line x1={leg.cx} y1="28" x2={leg.cx} y2="64" stroke={leg.softColor} strokeWidth="1.4" />
+            <rect
+              x={leg.cx - 59}
+              y="64"
+              width="118"
+              height="40"
+              rx="6"
+              fill={leg.color}
+              fillOpacity="0.08"
+              stroke={leg.color}
+              strokeOpacity="0.55"
+            />
+            <text
+              x={leg.cx}
+              y="85"
+              textAnchor="middle"
+              className="font-mono-tech"
+              fill="#F0EAD6"
+              fontSize="15"
+            >
+              {leg.pct}
+            </text>
+            <text
+              x={leg.cx}
+              y="98"
+              textAnchor="middle"
+              className="font-mono-tech"
+              fill="#8B8680"
+              fontSize="8.5"
+            >
+              {leg.label}
+            </text>
+          </g>
+        ))}
+
+        {/* Burn leg: half of the project fee is burned via a Token Burn CPI */}
+        <line x1="552" y1="104" x2="552" y2="130" stroke={WIRE} strokeOpacity="0.6" strokeWidth="1.4" />
+        <rect
+          x="493"
+          y="130"
+          width="118"
+          height="38"
+          rx="6"
+          fill={WIRE}
+          fillOpacity="0.1"
+          stroke={WIRE}
+          strokeOpacity="0.6"
+        />
+        <text x="552" y="150" textAnchor="middle" className="font-mono-tech" fill="#F0EAD6" fontSize="14">
+          2.5%
+        </text>
+        <text x="552" y="162" textAnchor="middle" className="font-mono-tech" fill="#8B8680" fontSize="8.5">
+          burn / SPL CPI
+        </text>
+      </svg>
     </div>
   );
 }

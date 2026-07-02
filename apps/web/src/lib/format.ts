@@ -31,3 +31,14 @@ export function shortHash(hash: string, prefix = 6, suffix = 6): string {
   if (hash.length <= prefix + suffix + 3) return hash;
   return `${hash.slice(0, prefix)}...${hash.slice(-suffix)}`;
 }
+
+export function formatCount(value: number): string {
+  if (!Number.isFinite(value)) return '--';
+  return Math.round(value).toLocaleString('en-US');
+}
+
+export function formatTps(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return '--';
+  if (value >= 100) return Math.round(value).toString();
+  return value.toFixed(1);
+}

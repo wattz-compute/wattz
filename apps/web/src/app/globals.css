@@ -41,6 +41,26 @@ body {
   color: var(--cluster-white);
 }
 
+/* Keyboard focus ring: a calm cyan glow, no default browser outline flash. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+[role='button']:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 2px rgba(5, 8, 24, 0.9),
+    0 0 0 3.5px rgba(91, 192, 235, 0.7),
+    0 0 16px rgba(91, 192, 235, 0.35);
+}
+
 .font-display {
   font-family: var(--font-space-mono), ui-monospace, monospace;
   letter-spacing: -0.01em;
@@ -154,6 +174,17 @@ body {
 .chip.gold .dot {
   background: var(--accent-gold);
   box-shadow: 0 0 8px rgba(212, 175, 55, 0.85);
+}
+
+.chip.muted {
+  border-color: rgba(139, 134, 128, 0.3);
+  background: rgba(10, 14, 39, 0.4);
+  color: rgba(240, 234, 214, 0.6);
+}
+
+.chip.muted .dot {
+  background: var(--fog);
+  box-shadow: none;
 }
 
 button.primary {
@@ -277,4 +308,48 @@ button.ghost:hover {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Wallet adapter: align the injected button with the substation palette. */
+.wallet-adapter-button.wallet-adapter-button-trigger {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  background: rgba(26, 26, 46, 0.85);
+  color: #f0ead6;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: #d4af37;
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.18);
+}
+
+.wallet-adapter-dropdown-list {
+  border: 1px solid rgba(91, 192, 235, 0.18);
+  background: #0a0e27;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+.wallet-adapter-dropdown-list-item:not([disabled]):hover {
+  background: rgba(91, 192, 235, 0.1);
+}
+
+.wallet-adapter-modal-wrapper {
+  border: 1px solid rgba(91, 192, 235, 0.18);
+  background: #0a0e27;
+}
+
+.wallet-adapter-modal-button-close {
+  background: rgba(26, 26, 46, 0.9);
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:not([disabled]):hover {
+  background: rgba(91, 192, 235, 0.08);
 }

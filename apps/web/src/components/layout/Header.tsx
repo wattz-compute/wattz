@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { SafeLink } from './SafeLink';
+import { ClusterChip } from '@/components/ui/ClusterChip';
 import { cn } from '@/lib/cn';
 
 const WalletMultiButton = dynamic(
@@ -12,8 +13,7 @@ const WalletMultiButton = dynamic(
 );
 
 const twitter = process.env.NEXT_PUBLIC_TWITTER || 'wattzfi';
-const github =
-  process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
+const github = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
 
 const nav = [
   { href: '/#solution', label: 'Solution' },
@@ -49,9 +49,7 @@ export function Header() {
           <span className="font-display text-lg tracking-tight text-cluster-white">
             wattz
           </span>
-          <span className="chip text-[10px] hidden sm:inline-flex">
-            <span className="dot" /> mainnet
-          </span>
+          <ClusterChip className="hidden text-[10px] sm:inline-flex" />
         </SafeLink>
 
         <nav className="hidden items-center gap-6 md:flex">

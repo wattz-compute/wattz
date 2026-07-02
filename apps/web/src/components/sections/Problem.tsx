@@ -11,7 +11,7 @@ const gaps = [
   {
     tag: 'Registry gap',
     title: 'No shared model registry',
-    body: 'Llama 3, Mistral, Stable Diffusion, and Whisper each ship with distinct licenses. Solana has no canonical way to publish and version them on-chain.',
+    body: 'Llama 3, GPT-OSS, Stable Diffusion, and Whisper each ship with distinct licenses. Solana has no canonical way to publish and version them on-chain.',
   },
   {
     tag: 'Trust gap',

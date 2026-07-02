@@ -1,37 +1,69 @@
 import { NextResponse } from 'next/server';
+import { CANONICAL_MODELS } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Baseline network snapshot. Replaced by the gateway when available.
-const BASELINE = {
-  gpuNodes: 6,
-  models: 5,
-  activeTflops: 268,
-  inferencesPerDay: 42130,
-  bootstrapNodesOnline: 2,
-  teeAttestations24h: 12184,
-};
+const PROGRAM_ID =
+  process.env.NEXT_PUBLIC_2_PROGRAM_ID || 'GUDVbE4Jgmtu8jgxUVtq2wUmjdLxJzPqT3zET2EdTLiU';
+const CLUSTER = process.env.NEXT_PUBLIC_SOLANA_CLUSTER || 'devnet';
+const GATEWAY_PUBLIC_URL = 'https://api.wattz.fi';
 
+// Canonical /api/stats contract. Gateway status/latency is a live healthz
+// round-trip; model counts come from the canonical catalog (or the live
+// registry when the gateway returns entries). No fabricated counters.
 export async function GET() {
-  const gateway = process.env.INFERENCE_GATEWAY_URL;
-  if (gateway) {
+  const gatewayBase = (process.env.INFERENCE_GATEWAY_URL || GATEWAY_PUBLIC_URL).replace(/\/$/, '');
+
+  let status: 'ok' | 'down' = 'down';
+  let latencyMs: number | null = null;
+  try {
+    const started = Date.now();
+    const res = await fetch(`${gatewayBase}/healthz`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) {
+      status = 'ok';
+      latencyMs = Date.now() - started;
+    }
+  } catch {
+    // Gateway unreachable; report down.
+  }
+
+  let relayLive = CANONICAL_MODELS.filter((m) => m.status === 'relay' || m.status === 'live').length;
+  let catalog = CANONICAL_MODELS.length;
+  if (status === 'ok') {
     try {
-      const res = await fetch(`${gateway.replace(/\/$/, '')}/v1/network/stats`, {
+      const res = await fetch(`${gatewayBase}/v1/models`, {
         cache: 'no-store',
-        headers: process.env.GATEWAY_AUTH_TOKEN
-          ? { authorization: `Bearer ${process.env.GATEWAY_AUTH_TOKEN}` }
-          : undefined,
+        signal: AbortSignal.timeout(5000),
       });
       if (res.ok) {
-        const data = await res.json();
-        if (data && typeof data === 'object') {
-          return NextResponse.json({ ...BASELINE, ...data });
+        const json = await res.json();
+        const data = Array.isArray(json?.data) ? json.data : [];
+        if (data.length > 0) {
+          catalog = data.length;
+          relayLive = data.filter(
+            (m: { status?: string }) => m.status === 'relay' || m.status === 'live',
+          ).length;
         }
       }
     } catch {
-      // Fall through to baseline.
+      // Keep canonical counts.
     }
   }
-  return NextResponse.json(BASELINE);
+
+  return NextResponse.json(
+    {
+      cluster: CLUSTER,
+      programId: PROGRAM_ID,
+      anchorVersion: '0.31',
+      gateway: { status, latencyMs, url: GATEWAY_PUBLIC_URL },
+      models: { relayLive, catalog },
+      relay: { provider: 'Groq LPU', active: status === 'ok' },
+      externalNodes: 0,
+    },
+    { headers: { 'cache-control': 's-maxage=60, stale-while-revalidate=120' } },
+  );
 }

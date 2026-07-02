@@ -1,9 +1,14 @@
 import { SafeLink } from './SafeLink';
+import { CopyAddress } from '@/components/ui/CopyAddress';
 import { projectCa } from '@/lib/solana';
 
 const twitter = process.env.NEXT_PUBLIC_TWITTER || 'wattzfi';
-const github =
-  process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
+const github = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
+const programId = process.env.NEXT_PUBLIC_2_PROGRAM_ID || '';
+const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER || 'devnet';
+const explorerHref = programId
+  ? `https://explorer.solana.com/address/${programId}?cluster=${cluster}`
+  : 'https://explorer.solana.com/';
 
 export function Footer() {
   const ca = projectCa();
@@ -18,13 +23,11 @@ export function Footer() {
             payments. Power the inference.
           </p>
           {ca ? (
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="mt-6 flex flex-col gap-3">
               <span className="chip gold text-[10px]">
                 <span className="dot" /> $WATTZ CA
               </span>
-              <code className="font-mono-tech text-xs text-cluster-white/85">
-                {ca}
-              </code>
+              <CopyAddress address={ca} />
             </div>
           ) : null}
         </div>
@@ -75,7 +78,7 @@ export function Footer() {
             </li>
             <li>
               <SafeLink
-                href="https://explorer.solana.com/"
+                href={explorerHref}
                 className="hover:text-cyan-glow"
               >
                 Solana Explorer
@@ -85,6 +88,25 @@ export function Footer() {
         </div>
       </div>
 
+      {programId ? (
+        <div className="mx-auto mt-10 max-w-7xl px-6">
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-cyan-glow/10 bg-night-deep/40 px-4 py-3">
+            <span className="chip gold text-[10px]">
+              <span className="dot" /> program id
+            </span>
+            <code className="break-all font-mono-tech text-xs text-cluster-white/85">
+              {programId}
+            </code>
+            <SafeLink
+              href={explorerHref}
+              className="ml-auto font-mono-tech text-[10px] uppercase tracking-widest text-cluster-white/60 hover:text-cyan-glow"
+            >
+              View on Explorer -&gt;
+            </SafeLink>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mx-auto mt-12 max-w-7xl px-6">
         <div className="wire-divider" />
         <div className="mt-6 flex flex-col items-start justify-between gap-3 text-xs text-fog md:flex-row md:items-center">
@@ -93,7 +115,7 @@ export function Footer() {
             advice.
           </span>
           <span className="font-mono-tech uppercase tracking-widest">
-            Solana mainnet -- Anchor 0.31 -- OpenAI 1.0 spec
+            Solana {cluster} -- Anchor 0.31 -- OpenAI 1.0 spec
           </span>
         </div>
       </div>

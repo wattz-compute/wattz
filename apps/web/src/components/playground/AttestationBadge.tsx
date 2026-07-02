@@ -1,10 +1,11 @@
 'use client';
 
-import type { AttestationSummary } from '@/lib/api';
+import type { AttestationSummary, RouteMeta } from '@/lib/api';
 import { shortHash } from '@/lib/format';
 
 interface AttestationBadgeProps {
   attestation: AttestationSummary | null;
+  meta: RouteMeta | null;
 }
 
 const typeLabels: Record<AttestationSummary['attestationType'], string> = {
@@ -15,12 +16,13 @@ const typeLabels: Record<AttestationSummary['attestationType'], string> = {
   sp1: 'SP1 zkVM',
 };
 
-export function AttestationBadge({ attestation }: AttestationBadgeProps) {
+export function AttestationBadge({ attestation, meta }: AttestationBadgeProps) {
   return (
     <div className="playground-panel p-5">
       <div className="font-mono-tech text-[10px] uppercase tracking-widest text-cluster-white/60">
         Attestation
       </div>
+
       {attestation ? (
         <div className="mt-3 space-y-2">
           <div className="flex items-center gap-2">
@@ -32,8 +34,7 @@ export function AttestationBadge({ attestation }: AttestationBadgeProps) {
             </span>
           </div>
           <div className="font-mono-tech text-[11px] text-cluster-white/70">
-            <span className="text-cluster-white/50">verifier</span>{' '}
-            {attestation.verifier}
+            <span className="text-cluster-white/50">verifier</span> {attestation.verifier}
           </div>
           <div className="font-mono-tech text-[11px] text-cluster-white/70">
             <span className="text-cluster-white/50">proof</span>{' '}
@@ -45,12 +46,31 @@ export function AttestationBadge({ attestation }: AttestationBadgeProps) {
           </div>
         </div>
       ) : (
-        <div className="mt-3 space-y-2 font-mono-tech text-[11px] text-cluster-white/60">
-          <div>Awaiting first response.</div>
-          <div className="text-cluster-white/45">
-            Every settled call carries a TEE attestation quote. Skeptical
-            clients may demand an additional Risc0 or SP1 receipt.
+        <div className="mt-3 space-y-2">
+          <span className="chip muted text-[10px]">
+            <span className="dot" /> relay
+          </span>
+          <div className="font-mono-tech text-[11px] leading-5 text-cluster-white/60">
+            Relay path — TEE attestation activates when the first bare-metal node
+            registers.
           </div>
+          {meta?.node ? (
+            <div className="font-mono-tech text-[11px] text-cluster-white/70">
+              <span className="text-cluster-white/50">node</span>{' '}
+              {shortHash(meta.node)}
+            </div>
+          ) : null}
+          {meta?.region ? (
+            <div className="font-mono-tech text-[11px] text-cluster-white/70">
+              <span className="text-cluster-white/50">region</span> {meta.region}
+            </div>
+          ) : null}
+          {meta?.requestId ? (
+            <div className="font-mono-tech text-[11px] text-cluster-white/70">
+              <span className="text-cluster-white/50">request</span>{' '}
+              {shortHash(meta.requestId)}
+            </div>
+          ) : null}
         </div>
       )}
     </div>

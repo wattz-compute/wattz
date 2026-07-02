@@ -2,60 +2,73 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
 
+type Status = 'live' | 'devnet' | 'relay' | 'at TGE';
+
+const statusTone: Record<Status, 'cyan' | 'wire' | 'gold' | 'muted'> = {
+  live: 'cyan',
+  devnet: 'cyan',
+  relay: 'gold',
+  'at TGE': 'muted',
+};
+
 const features = [
   {
     tag: 'Model registry',
     title: 'On-chain source of truth',
+    status: 'devnet' as Status,
     lines: [
       'Every model publishes as a PDA with license, weights checksum, and version.',
-      'Registry crawler scans license text at publish time. Commercial-only models are KYC-gated automatically.',
-      'Supports Meta Llama Community, Apache 2.0, MIT, OpenRAIL-M, and custom license classes.',
+      'The registry crawler scans license text at publish time; commercial-only weights are KYC-gated automatically.',
+      'License classes cover Meta Llama Community, Apache 2.0, MIT, and OpenRAIL-M.',
     ],
     metrics: [
-      { key: 'Registered models', value: 'Llama 3 - Mistral - SDXL - Whisper - GPT-OSS' },
-      { key: 'License classes', value: '5 supported, extensible' },
+      { key: 'Catalog', value: '5 models, 3 relay-live' },
+      { key: 'Licenses', value: 'Meta / Apache 2.0 / MIT / OpenRAIL-M' },
     ],
     glow: 'cyan' as const,
   },
   {
     tag: 'Compute verification',
     title: 'TEE plus optional ZK',
+    status: 'relay' as Status,
     lines: [
-      'GPU nodes execute under Intel SGX, AMD SEV, or NVIDIA Confidential Computing enclaves.',
-      'Each response returns an attestation quote; skeptical clients may demand a Risc0 or SP1 receipt of the tokenizer path.',
-      'Failed attestations trigger stake slashing through the Anchor dispute program.',
+      'Bare-metal GPU nodes run under Intel SGX, AMD SEV, or NVIDIA Confidential Computing, and each response carries an attestation quote.',
+      'Until the first node registers, inference is relayed and marked kind "relay" with verified:false -- no attestation is invented.',
+      'Once nodes are live, skeptical clients can demand a Risc0 or SP1 receipt of the tokenizer path.',
     ],
     metrics: [
-      { key: 'Enclave targets', value: 'SGX / SEV / NVIDIA CC' },
-      { key: 'ZK backends', value: 'Risc0 v1.1, SP1 v3.0' },
+      { key: 'Today', value: 'relay path, verified:false' },
+      { key: 'On node register', value: 'SGX / SEV / NVIDIA CC' },
     ],
     glow: 'gold' as const,
   },
   {
     tag: 'Routing engine',
     title: 'Latency-aware and honest',
+    status: 'relay' as Status,
     lines: [
-      'The router considers model availability, GPU class, regional latency, historical uptime, and price ceilings per call.',
-      'Priority routing is bought with $WATTZ stake; slashing punishes region misreporting.',
-      'Fallback logic transparently walks nodes so a single evicted GPU never breaks a session.',
+      'The router matches each request against model availability, region latency, GPU class, and per-call price ceilings.',
+      'Today all traffic routes to the Groq LPU relay; the wire protocol does not change when nodes join.',
+      'Fallback walks candidates in order, so a single evicted node never breaks a session.',
     ],
     metrics: [
-      { key: 'Global regions', value: 'US-East - US-West - EU - JP - SG' },
-      { key: 'Cold routes', value: '<180 ms median start' },
+      { key: 'Today', value: 'routes to Groq LPU relay' },
+      { key: 'Cold start', value: 'target: <200 ms' },
     ],
     glow: 'cyan' as const,
   },
   {
     tag: 'Streaming payment',
     title: 'Token-2022 per-token settlement',
+    status: 'at TGE' as Status,
     lines: [
-      'Every returned token triggers a transfer hook that debits $WATTZ from the caller and credits the node, model host, and treasury.',
-      'Anchor mainnet settles bulk state hourly; disputes and refunds resolve on-chain.',
-      'A single OpenAI request is one on-chain settlement, not one per token.',
+      'Each settled request splits its fee on-chain: 80% to the node immediately, 10% held as node pending, 5% to the model publisher, 5% project fee.',
+      'Half of the project fee -- 2.5% of every settled fee -- is burned through a direct SPL Token Burn CPI.',
+      'Token-2022 streaming settlement activates with the $WATTZ mint at launch; one request settles once, not once per token.',
     ],
     metrics: [
-      { key: 'Settlement window', value: '3600 s bulk, per-call resolve' },
-      { key: 'Fee split', value: 'Node 68 - Host 22 - Treasury 10' },
+      { key: 'Fee split', value: 'Node 80, pending 10, pub 5, proj 5' },
+      { key: 'Burn', value: '2.5% of every settled fee' },
     ],
     glow: 'wire' as const,
   },
@@ -88,9 +101,9 @@ export function FeaturesSection() {
                     <span className="font-mono-tech text-[10px] uppercase tracking-[0.24em] text-cyan-glow/85">
                       {f.tag}
                     </span>
-                    <span className="chip warn text-[9px]">
-                      <span className="dot" /> live
-                    </span>
+                    <Chip tone={statusTone[f.status]} className="text-[9px]">
+                      {f.status}
+                    </Chip>
                   </div>
                   <div className="font-display text-2xl leading-snug text-cluster-white">
                     {f.title}
