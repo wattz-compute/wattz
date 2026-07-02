@@ -22,6 +22,7 @@ export {
 export {
   buildTransferWithHookIx,
   deriveStreamPda,
+  streamIdSeed,
   transferHookExtraAccounts,
   STREAM_PDA_SEED,
   type HookedTransferParams,

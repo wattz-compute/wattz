@@ -16,4 +16,4 @@
 
 pub mod client;
 
-pub use client::{ModelEntry, ModelRegistryAccount, RegistryClient};
+pub use client::{canonical_catalog, ModelEntry, ModelRegistryAccount, RegistryClient};

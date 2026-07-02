@@ -15,5 +15,5 @@ pub mod engine;
 pub mod health;
 pub mod node_pool;
 
-pub use engine::{NodeSelection, RoutingEngine};
+pub use engine::{NodeSelection, RoutedTarget, RoutingEngine};
 pub use node_pool::{NodeCapability, NodeSpec, NodePool};

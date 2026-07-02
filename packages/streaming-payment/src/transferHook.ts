@@ -9,7 +9,7 @@
  *
  * This module encodes the client-side pieces:
  *
- *  - `createTransferHookExtraAccountsIx` -- builds the additional
+ *  - `transferHookExtraAccounts` -- builds the additional
  *    `AccountMeta`s that Token-2022 forwards to the hook (per SPL Token
  *    2022 transfer_hook interface).
  *  - `buildTransferWithHookIx` -- convenience wrapper around
@@ -17,6 +17,7 @@
  *  - `deriveStreamPda` -- computes the deterministic PDA of a stream.
  */
 
+import { createHash } from "node:crypto";
 import {
   createTransferCheckedInstruction,
   TOKEN_2022_PROGRAM_ID,
@@ -31,6 +32,19 @@ import {
 export const STREAM_PDA_SEED = new TextEncoder().encode("wattz-stream");
 
 /**
+ * Hash a stream id down to a fixed 32-byte seed.
+ *
+ * Stream ids are UUIDv4 strings, which are 36 bytes as UTF-8 (including
+ * hyphens) and therefore exceed the 32-byte per-seed limit that
+ * `findProgramAddressSync` enforces. SHA-256 collapses any id to a stable
+ * 32-byte seed; the on-chain hook program hashes the id the same way when
+ * it re-derives the PDA.
+ */
+export function streamIdSeed(streamId: string): Uint8Array {
+  return new Uint8Array(createHash("sha256").update(streamId, "utf8").digest());
+}
+
+/**
  * Derive the `(streamPda, bump)` for a given stream id.
  *
  * @param programId Wattz Anchor program id.
@@ -41,27 +55,30 @@ export function deriveStreamPda(
   streamId: string,
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [STREAM_PDA_SEED, new TextEncoder().encode(streamId)],
+    [STREAM_PDA_SEED, streamIdSeed(streamId)],
     programId,
   );
 }
 
 /**
- * Assemble the extra `AccountMeta`s that the Token-2022 transfer hook
- * expects to receive. The account order is fixed by the
- * `spl-transfer-hook-interface` specification:
+ * Assemble the extra `AccountMeta`s appended to a Token-2022
+ * `transferChecked` so the transfer hook can settle the stream.
  *
- *   [0] source token account (writable)
- *   [1] mint (readonly)
- *   [2] destination token account (writable)
- *   [3] authority (signer)
- *   [4] wattz stream PDA (writable, owned by the Wattz program)
- *   [5] wattz program id (readonly, program)
+ * Under the SPL Transfer Hook interface the mint's `TransferHook`
+ * extension names the hook program, and the hook program owns an
+ * `ExtraAccountMetaList` PDA (seeds `['extra-account-metas', mint]`) that
+ * declares the additional accounts every transfer must carry. For a Wattz
+ * stream that extra account is the per-stream PDA. Token-2022 reads the
+ * list and CPIs into the hook with `source / mint / destination / owner`
+ * plus the declared extras.
  *
- * The final two entries are the "extra accounts" the hook needs; the
- * first four repeat the accounts already supplied by
- * `transferChecked` and Token-2022 fills them in automatically. They
- * are listed here as documentation only.
+ * At launch, callers build the transfer with
+ * `createTransferCheckedWithTransferHookInstruction` from
+ * `@solana/spl-token`, which fetches the `ExtraAccountMetaList` and
+ * resolves these accounts automatically. This helper is the explicit
+ * form used by the design and test path: it appends the stream PDA and
+ * the hook program id that Token-2022 needs present in the outer
+ * instruction's account list.
  */
 export function transferHookExtraAccounts(
   streamPda: PublicKey,

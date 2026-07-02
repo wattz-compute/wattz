@@ -63,6 +63,21 @@ pub struct Config {
 
     /// Router health-check interval in seconds.
     pub health_interval_secs: u64,
+
+    /// Optional Groq API key. When set, the gateway proxies
+    /// Groq-preferred models (and any request the node pool cannot
+    /// serve) to the Groq OpenAI-compatible endpoint. Loaded from
+    /// `GROQ_API_KEY`. Never exposed to the frontend.
+    pub groq_api_key: Option<String>,
+
+    /// Groq base URL. Overridable for testing / regional endpoints.
+    /// Loaded from `GROQ_BASE_URL`, defaults to Groq's public endpoint.
+    pub groq_base_url: String,
+
+    /// Whether the Groq fallback is enabled. Auto-derived from
+    /// `groq_api_key.is_some()` unless explicitly disabled with
+    /// `GROQ_FALLBACK_ENABLED=false`.
+    pub groq_fallback_enabled: bool,
 }
 
 impl Config {
@@ -86,7 +101,7 @@ impl Config {
 
         let solana_rpc_url = env::var("SOLANA_RPC_URL")
             .or_else(|_| env::var("HELIUS_RPC_URL"))
-            .unwrap_or_else(|_| "https://api.mainnet-beta.solana.com".to_string());
+            .unwrap_or_else(|_| "https://api.devnet.solana.com".to_string());
 
         let solana_ws_url = env::var("HELIUS_WS_URL").ok();
 
@@ -123,6 +138,17 @@ impl Config {
             .and_then(|s| s.parse::<u64>().ok())
             .unwrap_or(30);
 
+        let groq_api_key = env::var("GROQ_API_KEY")
+            .ok()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty());
+        let groq_base_url = env::var("GROQ_BASE_URL")
+            .unwrap_or_else(|_| crate::providers::groq::DEFAULT_GROQ_BASE_URL.to_string());
+        let groq_fallback_enabled = match env::var("GROQ_FALLBACK_ENABLED") {
+            Ok(v) => matches!(v.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"),
+            Err(_) => groq_api_key.is_some(),
+        };
+
         Ok(Self {
             listen_addr,
             cors_origins,
@@ -139,6 +165,9 @@ impl Config {
             routing_weights,
             upstream_timeout_secs,
             health_interval_secs,
+            groq_api_key,
+            groq_base_url,
+            groq_fallback_enabled,
         })
     }
 }

@@ -15,9 +15,6 @@ pub enum ApiError {
     #[error("bad request: {0}")]
     BadRequest(String),
 
-    #[error("model not found in registry: {0}")]
-    ModelNotFound(String),
-
     #[error("no healthy node available for model {0}")]
     NoNodeAvailable(String),
 
@@ -47,7 +44,6 @@ impl ApiError {
     fn status(&self) -> StatusCode {
         match self {
             ApiError::BadRequest(_) => StatusCode::BAD_REQUEST,
-            ApiError::ModelNotFound(_) => StatusCode::NOT_FOUND,
             ApiError::NoNodeAvailable(_) => StatusCode::SERVICE_UNAVAILABLE,
             ApiError::Upstream(_) => StatusCode::BAD_GATEWAY,
             ApiError::AttestationFailed(_) => StatusCode::UNPROCESSABLE_ENTITY,
@@ -62,7 +58,6 @@ impl ApiError {
     fn error_type(&self) -> &'static str {
         match self {
             ApiError::BadRequest(_) | ApiError::Json(_) => "invalid_request_error",
-            ApiError::ModelNotFound(_) => "not_found",
             ApiError::NoNodeAvailable(_) => "service_unavailable",
             ApiError::Upstream(_) | ApiError::Reqwest(_) => "upstream_error",
             ApiError::AttestationFailed(_) => "attestation_error",

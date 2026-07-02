@@ -181,10 +181,15 @@ pub struct ModelObject {
     pub created: i64,
     pub owned_by: String,
     // Wattz extensions.
+    pub display_name: String,
     pub license: String,
     pub max_context: u32,
     pub kyc_required: bool,
     pub serving_nodes: usize,
+    /// Serving status chip: `live` (a node serves it), `relay` (served
+    /// through the Groq relay path), or `awaiting node` (catalogued but
+    /// not yet servable).
+    pub status: &'static str,
 }
 
 #[derive(Clone, Debug, Serialize)]
