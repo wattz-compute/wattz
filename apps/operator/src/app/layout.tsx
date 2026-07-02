@@ -26,9 +26,17 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://operator.wattz.fi'),
   title: 'Wattz Operator Dashboard',
   description:
     'Operate a Wattz GPU inference node on Solana. Track uptime, revenue, model roster, and claim rewards.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
     title: 'Wattz Operator Dashboard',
     description: 'Solana AI inference marketplace. Operator control plane.',
@@ -36,7 +44,7 @@ export const metadata: Metadata = {
     siteName: 'Wattz Operator',
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'Wattz Operator Dashboard',
     description: 'Solana AI inference marketplace. Operator control plane.',
   },

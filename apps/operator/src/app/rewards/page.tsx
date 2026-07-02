@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
   PublicKey,
@@ -13,9 +13,7 @@ import { api } from '@/lib/api';
 import { ErrorPanel } from '@/components/ErrorPanel';
 import { StatCard } from '@/components/StatCard';
 import { RevenueChart } from '@/components/RevenueChart';
-import { formatLamports, timeAgo } from '@/lib/format';
-
-const REWARD_LAYOUT_PENDING_OFFSET = 8 + 32;
+import { errorTitle, explorerTxUrl, formatLamports, solanaCluster, timeAgo } from '@/lib/format';
 
 async function anchorDiscriminator(name: string): Promise<Uint8Array> {
   const bytes = new TextEncoder().encode(`global:${name}`);
@@ -26,9 +24,11 @@ async function anchorDiscriminator(name: string): Promise<Uint8Array> {
 export default function RewardsPage() {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
+  const queryClient = useQueryClient();
   const operator = useMemo(() => publicKey?.toBase58(), [publicKey]);
   const [txStatus, setTxStatus] = useState<string | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
+  const cluster = solanaCluster();
 
   const programIdStr = process.env.NEXT_PUBLIC_2_PROGRAM_ID;
 
@@ -39,11 +39,18 @@ export default function RewardsPage() {
     refetchInterval: 30_000,
   });
 
+  const rewards = rewardsQuery.data;
+  const hasRewards =
+    !!rewards &&
+    (rewards.pending_lamports > 0 ||
+      rewards.claimed_lamports > 0 ||
+      rewards.revenue_series.length > 0);
+
   const canClaim =
     !!publicKey &&
     !!programIdStr &&
     programIdStr.length > 0 &&
-    (rewardsQuery.data?.pending_lamports ?? 0) > 0;
+    (rewards?.pending_lamports ?? 0) > 0;
 
   async function handleClaim() {
     if (!publicKey || !programIdStr) return;
@@ -77,11 +84,8 @@ export default function RewardsPage() {
         'confirmed',
       );
       setTxStatus(`confirmed:${signature}`);
-      // decode the reward account to reflect the new pending balance
-      const info = await connection.getAccountInfo(rewardPda);
-      if (info && info.data.length >= REWARD_LAYOUT_PENDING_OFFSET + 8) {
-        void info.data.readBigUInt64LE(REWARD_LAYOUT_PENDING_OFFSET);
-      }
+      // Pull the fresh pending balance from the gateway.
+      await queryClient.invalidateQueries({ queryKey: ['rewards', operator] });
     } catch (err) {
       setTxError(err instanceof Error ? err.message : String(err));
       setTxStatus(null);
@@ -97,7 +101,7 @@ export default function RewardsPage() {
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-fog">
           Rewards accrue every time your node serves inference. Settlement runs on the Wattz Anchor
-          program on Solana mainnet. Claiming pulls the pending amount into your wallet.
+          program on Solana ({cluster}). Claiming pulls the pending amount into your wallet.
         </p>
       </section>
 
@@ -109,36 +113,42 @@ export default function RewardsPage() {
 
       {publicKey && !programIdStr && (
         <ErrorPanel
+          title="Program id missing"
           message="NEXT_PUBLIC_2_PROGRAM_ID is not configured for this deployment."
           hint="Add the Anchor program id in Vercel Production and redeploy."
         />
       )}
 
       {publicKey && rewardsQuery.isError && (
-        <ErrorPanel message={(rewardsQuery.error as Error).message} />
+        <ErrorPanel
+          title={errorTitle(rewardsQuery.error)}
+          message={(rewardsQuery.error as Error).message}
+        />
       )}
 
-      {publicKey && rewardsQuery.data && (
+      {publicKey && rewards && !hasRewards && (
+        <div className="wattz-card rounded-lg p-8 text-center text-sm text-fog">
+          No rewards accrued yet — bring a node online.
+        </div>
+      )}
+
+      {publicKey && rewards && hasRewards && (
         <>
           <section className="grid gap-4 md:grid-cols-3">
             <StatCard
               label="Pending"
-              value={formatLamports(rewardsQuery.data.pending_lamports)}
+              value={formatLamports(rewards.pending_lamports)}
               hint="Claimable now"
               accent="gold"
             />
             <StatCard
               label="Claimed lifetime"
-              value={formatLamports(rewardsQuery.data.claimed_lamports)}
+              value={formatLamports(rewards.claimed_lamports)}
               accent="wire"
             />
             <StatCard
               label="Last claim"
-              value={
-                rewardsQuery.data.last_claim_at
-                  ? timeAgo(rewardsQuery.data.last_claim_at)
-                  : 'never'
-              }
+              value={rewards.last_claim_at ? timeAgo(rewards.last_claim_at) : 'never'}
             />
           </section>
 
@@ -159,7 +169,7 @@ export default function RewardsPage() {
                 Confirmed. Signature:{' '}
                 <a
                   className="underline"
-                  href={`https://solscan.io/tx/${txStatus.slice('confirmed:'.length)}`}
+                  href={explorerTxUrl(txStatus.slice('confirmed:'.length))}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -171,7 +181,7 @@ export default function RewardsPage() {
           </section>
 
           <section>
-            <RevenueChart data={rewardsQuery.data.revenue_series} />
+            <RevenueChart data={rewards.revenue_series} />
           </section>
         </>
       )}

@@ -1,4 +1,6 @@
-import type { ModelInfo, NodeInfo } from '@/types/wattz';
+import type { ModelListResponse, NodeInfo, NodeListResponse } from '@/types/wattz';
+
+export type PayloadSource = 'network-preview';
 
 export interface OperatorStats {
   operator?: string;
@@ -11,6 +13,7 @@ export interface OperatorStats {
   cumulative_revenue_lamports: number;
   pending_rewards_lamports: number;
   updated_at: number;
+  source?: PayloadSource;
 }
 
 export interface RewardsSnapshot {
@@ -19,6 +22,7 @@ export interface RewardsSnapshot {
   claimed_lamports: number;
   last_claim_at?: number;
   revenue_series: RevenuePoint[];
+  source?: PayloadSource;
 }
 
 export interface RevenuePoint {
@@ -34,10 +38,33 @@ export interface UptimePoint {
   requests: number;
 }
 
+export interface StatsHistoryPoint {
+  timestamp: number;
+  inferences: number;
+  tokens: number;
+  revenue_lamports: number;
+}
+
+export interface StatsHistoryResponse {
+  object: 'list';
+  data: StatsHistoryPoint[];
+  source?: PayloadSource;
+}
+
+export interface NodeEvent {
+  timestamp: number;
+  kind: string;
+  message: string;
+}
+
 export interface NodeDetail extends NodeInfo {
   uptime_series: UptimePoint[];
   revenue_series: RevenuePoint[];
   models_loaded: string[];
+  first_seen?: number;
+  price_multiplier?: number;
+  events?: NodeEvent[];
+  source?: PayloadSource;
 }
 
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -66,12 +93,16 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   stats: (operator?: string) =>
-    fetchJson<OperatorStats>(operator ? `/api/stats?operator=${operator}` : '/api/stats'),
+    fetchJson<OperatorStats>(
+      operator ? `/api/stats?operator=${encodeURIComponent(operator)}` : '/api/stats',
+    ),
+  statsHistory: () => fetchJson<StatsHistoryResponse>('/api/stats/history'),
   nodes: (operator?: string) =>
-    fetchJson<{ object: 'list'; data: NodeInfo[] }>(
-      operator ? `/api/nodes?operator=${operator}` : '/api/nodes',
+    fetchJson<NodeListResponse>(
+      operator ? `/api/nodes?operator=${encodeURIComponent(operator)}` : '/api/nodes',
     ),
   node: (id: string) => fetchJson<NodeDetail>(`/api/nodes/${encodeURIComponent(id)}`),
-  models: () => fetchJson<{ object: 'list'; data: ModelInfo[] }>('/api/models'),
-  rewards: (operator: string) => fetchJson<RewardsSnapshot>(`/api/rewards?operator=${operator}`),
+  models: () => fetchJson<ModelListResponse>('/api/models'),
+  rewards: (operator: string) =>
+    fetchJson<RewardsSnapshot>(`/api/rewards?operator=${encodeURIComponent(operator)}`),
 };

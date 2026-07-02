@@ -5,11 +5,15 @@
  */
 
 export function gatewayBaseURL(): string {
-  return (
+  const raw = (
     process.env.INFERENCE_GATEWAY_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
-    'http://localhost:8080/v1'
+    'http://localhost:8080'
   ).replace(/\/+$/, '');
+  // The gateway serves OpenAI-compatible paths under /v1. Normalize so a bare
+  // host (https://api.wattz.fi) and an already-versioned URL both resolve to
+  // the same base and proxies hit the real endpoints.
+  return raw.endsWith('/v1') ? raw : `${raw}/v1`;
 }
 
 export function gatewayApiKey(): string | undefined {

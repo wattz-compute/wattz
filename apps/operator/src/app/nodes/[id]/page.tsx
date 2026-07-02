@@ -7,7 +7,7 @@ import { RevenueChart } from '@/components/RevenueChart';
 import { ModelChip } from '@/components/ModelChip';
 import { StatCard } from '@/components/StatCard';
 import { ErrorPanel } from '@/components/ErrorPanel';
-import { formatLamports, formatNumber, formatPct, formatTflops, shortPubkey, timeAgo } from '@/lib/format';
+import { errorTitle, formatLamports, formatNumber, formatPct, formatTflops, shortPubkey, timeAgo } from '@/lib/format';
 
 const attestationLabel: Record<string, string> = {
   sgx: 'Intel SGX quote',
@@ -34,7 +34,12 @@ export default function NodeDetailPage({ params }: { params: { id: string } }) {
   }
 
   if (nodeQuery.isError) {
-    return <ErrorPanel message={(nodeQuery.error as Error).message} />;
+    return (
+      <ErrorPanel
+        title={errorTitle(nodeQuery.error)}
+        message={(nodeQuery.error as Error).message}
+      />
+    );
   }
 
   const node = nodeQuery.data;
@@ -58,10 +63,16 @@ export default function NodeDetailPage({ params }: { params: { id: string } }) {
             {node.online ? 'online' : 'offline'}
           </span>
           <span className="badge badge-gold">{attestationLabel[node.attestation_kind]}</span>
+          {node.source === 'network-preview' && (
+            <span className="inline-flex items-center rounded border border-fog/30 bg-shadow px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-fog">
+              network preview
+            </span>
+          )}
         </div>
         <p className="mt-3 text-sm text-fog">
-          Operator {shortPubkey(node.operator)} in {node.region}. Heartbeat {timeAgo(node.last_heartbeat)}.
-          First seen {timeAgo(node.first_seen)}.
+          Operator {shortPubkey(node.operator)} in {node.region}. Heartbeat{' '}
+          {timeAgo(node.last_heartbeat)}.
+          {node.first_seen ? ` First seen ${timeAgo(node.first_seen)}.` : ''}
         </p>
       </section>
 
@@ -100,7 +111,7 @@ export default function NodeDetailPage({ params }: { params: { id: string } }) {
           {node.models_loaded.length === 0 && (
             <div className="text-xs text-fog">
               No models loaded yet. Run{' '}
-              <code className="font-mono text-cyan">wattz node start --model llama-3-8b-instruct</code>{' '}
+              <code className="font-mono text-cyan">wattz node start --model llama-3.1-8b-instant</code>{' '}
               to pin a model.
             </div>
           )}
@@ -121,7 +132,7 @@ export default function NodeDetailPage({ params }: { params: { id: string } }) {
         <div className="wattz-card rounded-lg p-5">
           <div className="metric-label">Pricing</div>
           <div className="metric-value mt-3 text-2xl">
-            price multiplier x{node.price_multiplier.toFixed(2)}
+            price multiplier x{(node.price_multiplier ?? 1).toFixed(2)}
           </div>
           <div className="mt-2 text-xs text-fog">
             Final price = base * multiplier * region factor. Base prices are set in the model
@@ -133,6 +144,26 @@ export default function NodeDetailPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       </section>
+
+      {node.events && node.events.length > 0 && (
+        <section>
+          <div className="metric-label">Recent events</div>
+          <ul className="mt-3 space-y-2 font-mono text-xs text-cluster/80">
+            {node.events.map((event, i) => (
+              <li
+                key={`${event.timestamp}-${i}`}
+                className="flex flex-col gap-1 border-l border-cyan/20 pl-3 sm:flex-row sm:items-baseline sm:gap-3"
+              >
+                <span className="w-20 shrink-0 text-fog">{timeAgo(event.timestamp)}</span>
+                <span className="w-24 shrink-0 uppercase tracking-widest text-cyan/70">
+                  {event.kind}
+                </span>
+                <span>{event.message}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

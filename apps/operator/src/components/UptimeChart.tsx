@@ -8,6 +8,17 @@ interface UptimeChartProps {
 }
 
 export function UptimeChart({ data }: UptimeChartProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="wattz-card flex h-72 flex-col rounded-lg p-4">
+        <div className="metric-label mb-3">Uptime (30d rolling %)</div>
+        <div className="flex flex-1 items-center justify-center text-center text-xs text-fog">
+          No uptime samples yet.
+        </div>
+      </div>
+    );
+  }
+
   const rows = data.map((p) => ({
     ts: new Date(p.timestamp * 1000).toLocaleDateString('en-US', {
       month: 'short',

@@ -4,6 +4,7 @@ export function Footer() {
   const twitter = process.env.NEXT_PUBLIC_TWITTER || 'wattzfi';
   const github = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
   const ca = process.env.NEXT_PUBLIC_0_PROJECT_CA;
+  const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER || 'devnet';
 
   return (
     <footer className="mt-24 border-t border-cyan/10 bg-navy/70">
@@ -70,7 +71,7 @@ export function Footer() {
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-cyan/10 pt-6 text-xs text-fog md:flex-row md:items-center">
           <span>Power the inference.</span>
-          <span>Wattz Labs. Solana mainnet. Apache-2.0.</span>
+          <span>Wattz Labs. Solana {cluster}. Apache-2.0.</span>
         </div>
       </div>
     </footer>

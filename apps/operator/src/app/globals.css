@@ -87,3 +87,47 @@ body {
   border-color: rgba(139, 134, 128, 0.35);
   color: rgba(200, 195, 189, 0.85);
 }
+
+/* Wallet adapter: align the injected button with the substation palette. */
+.wallet-adapter-button.wallet-adapter-button-trigger {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  background: rgba(26, 26, 46, 0.85);
+  color: #f0ead6;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: #d4af37;
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.18);
+}
+
+.wallet-adapter-dropdown-list {
+  border: 1px solid rgba(91, 192, 235, 0.18);
+  background: #0a0e27;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+.wallet-adapter-dropdown-list-item:not([disabled]):hover {
+  background: rgba(91, 192, 235, 0.1);
+}
+
+.wallet-adapter-modal-wrapper {
+  border: 1px solid rgba(91, 192, 235, 0.18);
+  background: #0a0e27;
+}
+
+.wallet-adapter-modal-button-close {
+  background: rgba(26, 26, 46, 0.9);
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:not([disabled]):hover {
+  background: rgba(91, 192, 235, 0.08);
+}

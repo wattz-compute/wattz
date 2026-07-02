@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { proxyJson } from '@/lib/env';
+import { baselineRewards } from '@/lib/baseline';
 import type { RewardsSnapshot } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -16,8 +17,8 @@ export async function GET(request: Request) {
   const result = await proxyJson<RewardsSnapshot>(
     `/rewards?operator=${encodeURIComponent(operator)}`,
   );
-  if (!result.ok) {
-    return NextResponse.json({ error: { message: result.message } }, { status: result.status });
+  if (result.ok) {
+    return NextResponse.json(result.data);
   }
-  return NextResponse.json(result.data);
+  return NextResponse.json(baselineRewards(operator));
 }

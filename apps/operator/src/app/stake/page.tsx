@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
   LAMPORTS_PER_SOL,
@@ -11,7 +11,8 @@ import {
 } from '@solana/web3.js';
 import { StatCard } from '@/components/StatCard';
 import { ErrorPanel } from '@/components/ErrorPanel';
-import { formatLamports, shortPubkey } from '@/lib/format';
+import { PROTOCOL_MIN_STAKE_SOL } from '@/lib/constants';
+import { explorerTxUrl, formatLamports, shortPubkey, solanaCluster } from '@/lib/format';
 
 async function anchorDiscriminator(name: string): Promise<Uint8Array> {
   const bytes = new TextEncoder().encode(`global:${name}`);
@@ -31,19 +32,55 @@ export default function StakePage() {
   const { connection } = useConnection();
   const [amount, setAmount] = useState('1.0');
   const [balanceLamports, setBalanceLamports] = useState<number | null>(null);
+  // null = unknown / not queried, 0 = no stake account, >0 = lamports in the PDA
+  const [stakeLamports, setStakeLamports] = useState<number | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const programIdStr = process.env.NEXT_PUBLIC_2_PROGRAM_ID;
   const operator = useMemo(() => publicKey?.toBase58(), [publicKey]);
+  const cluster = solanaCluster();
 
-  useMemo(() => {
+  const stakePda = useMemo(() => {
+    if (!publicKey || !programIdStr) return null;
+    try {
+      const programId = new PublicKey(programIdStr);
+      return PublicKey.findProgramAddressSync(
+        [Buffer.from('stake'), publicKey.toBuffer()],
+        programId,
+      )[0];
+    } catch {
+      return null;
+    }
+  }, [publicKey, programIdStr]);
+
+  const refresh = useCallback(async () => {
     if (!publicKey) return;
-    connection
-      .getBalance(publicKey)
-      .then(setBalanceLamports)
-      .catch(() => setBalanceLamports(null));
-  }, [publicKey, connection]);
+    try {
+      setBalanceLamports(await connection.getBalance(publicKey));
+    } catch {
+      setBalanceLamports(null);
+    }
+    if (stakePda) {
+      try {
+        const info = await connection.getAccountInfo(stakePda);
+        setStakeLamports(info ? info.lamports : 0);
+      } catch {
+        setStakeLamports(null);
+      }
+    } else {
+      setStakeLamports(null);
+    }
+  }, [publicKey, connection, stakePda]);
+
+  useEffect(() => {
+    if (!publicKey) {
+      setBalanceLamports(null);
+      setStakeLamports(null);
+      return;
+    }
+    void refresh();
+  }, [publicKey, refresh]);
 
   async function handleStake() {
     setError(null);
@@ -60,7 +97,7 @@ export default function StakePage() {
     }
     try {
       const programId = new PublicKey(programIdStr);
-      const [stakePda] = PublicKey.findProgramAddressSync(
+      const [pda] = PublicKey.findProgramAddressSync(
         [Buffer.from('stake'), publicKey.toBuffer()],
         programId,
       );
@@ -72,7 +109,7 @@ export default function StakePage() {
         programId,
         keys: [
           { pubkey: publicKey, isSigner: true, isWritable: true },
-          { pubkey: stakePda, isSigner: false, isWritable: true },
+          { pubkey: pda, isSigner: false, isWritable: true },
           { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
         ],
         data: Buffer.from(data),
@@ -89,8 +126,7 @@ export default function StakePage() {
         'confirmed',
       );
       setStatus(`confirmed:${signature}`);
-      const newBalance = await connection.getBalance(publicKey);
-      setBalanceLamports(newBalance);
+      await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setStatus(null);
@@ -119,13 +155,14 @@ export default function StakePage() {
 
       {publicKey && !programIdStr && (
         <ErrorPanel
+          title="Program id missing"
           message="NEXT_PUBLIC_2_PROGRAM_ID is not configured for this deployment."
           hint="Add the Anchor program id in Vercel Production and redeploy."
         />
       )}
 
       {publicKey && (
-        <section className="grid gap-4 md:grid-cols-3">
+        <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             label="Wallet"
             value={<span className="font-mono text-base">{shortPubkey(operator)}</span>}
@@ -136,9 +173,15 @@ export default function StakePage() {
             accent="gold"
           />
           <StatCard
+            label="Current stake"
+            value={stakeLamports !== null ? formatLamports(stakeLamports) : '-'}
+            hint={stakeLamports === 0 ? 'No stake account yet' : 'Held in your stake PDA'}
+            accent="wire"
+          />
+          <StatCard
             label="Cluster"
-            value="mainnet-beta"
-            hint="Anchor settlement program lives on mainnet."
+            value={cluster}
+            hint="Anchor settlement program runs on this cluster."
           />
         </section>
       )}
@@ -156,6 +199,9 @@ export default function StakePage() {
               className="mt-3 w-full rounded-md border border-cyan/25 bg-shadow px-3 py-2 font-mono text-lg text-cluster focus:border-cyan focus:outline-none"
             />
           </label>
+          <p className="mt-3 text-xs text-fog">
+            Protocol minimum stake is {PROTOCOL_MIN_STAKE_SOL} SOL.
+          </p>
           <button
             onClick={handleStake}
             disabled={status === 'awaiting-signature' || status === 'confirming'}
@@ -170,7 +216,7 @@ export default function StakePage() {
               Confirmed. Signature{' '}
               <a
                 className="underline"
-                href={`https://solscan.io/tx/${status.slice('confirmed:'.length)}`}
+                href={explorerTxUrl(status.slice('confirmed:'.length))}
                 target="_blank"
                 rel="noopener noreferrer"
               >

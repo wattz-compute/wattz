@@ -46,3 +46,28 @@ export function timeAgo(unixSeconds: number): string {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
 }
+
+export function solanaCluster(): string {
+  return process.env.NEXT_PUBLIC_SOLANA_CLUSTER || 'devnet';
+}
+
+export function explorerTxUrl(signature: string): string {
+  const cluster = solanaCluster();
+  const suffix = cluster === 'mainnet-beta' ? '' : `?cluster=${cluster}`;
+  return `https://explorer.solana.com/tx/${signature}${suffix}`;
+}
+
+export function errorTitle(err: unknown): string {
+  const status = (err as { status?: number } | null)?.status;
+  if (status === 404) return 'Node not found';
+  if (status === 400) return 'Bad request';
+  if (status === 401 || status === 403) return 'Unauthorized';
+  if (status === 408 || status === 504) return 'Request timed out';
+  if (typeof status === 'number' && status >= 500) return 'Gateway unavailable';
+  const msg = err instanceof Error ? err.message.toLowerCase() : '';
+  if (msg.includes('timeout') || msg.includes('timed out') || msg.includes('abort')) {
+    return 'Request timed out';
+  }
+  if (msg.includes('failed to fetch') || msg.includes('network')) return 'Network error';
+  return 'Gateway unavailable';
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 import { SafeLink } from './SafeLink';
 
 const WalletMultiButton = dynamic(
@@ -18,6 +19,10 @@ const NAV_LINKS: Array<{ href: string; label: string }> = [
 export function Header() {
   const twitter = process.env.NEXT_PUBLIC_TWITTER || 'wattzfi';
   const github = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
+  const pathname = usePathname();
+
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <header className="sticky top-0 z-30 border-b border-cyan/10 bg-navy/85 backdrop-blur">
@@ -32,15 +37,23 @@ export function Header() {
             </span>
           </SafeLink>
           <nav className="hidden gap-6 md:flex">
-            {NAV_LINKS.map((link) => (
-              <SafeLink
-                key={link.href}
-                href={link.href}
-                className="text-xs uppercase tracking-[0.24em] text-fog transition-colors hover:text-cyan"
-              >
-                {link.label}
-              </SafeLink>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <SafeLink
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? 'page' : undefined}
+                  className={
+                    active
+                      ? 'border-b-2 border-cyan pb-1 text-xs uppercase tracking-[0.24em] text-cyan'
+                      : 'border-b-2 border-transparent pb-1 text-xs uppercase tracking-[0.24em] text-fog transition-colors hover:text-cyan'
+                  }
+                >
+                  {link.label}
+                </SafeLink>
+              );
+            })}
           </nav>
         </div>
         <div className="flex items-center gap-4">

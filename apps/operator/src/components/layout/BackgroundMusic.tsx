@@ -138,7 +138,6 @@ declare global {
 }
 
 // Minimal YT namespace typing to avoid pulling in @types/youtube.
-// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace YT {
   interface PlayerOptions {
     videoId?: string;
