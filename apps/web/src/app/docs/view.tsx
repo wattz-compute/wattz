@@ -322,7 +322,9 @@ const endpoints: { method: 'GET' | 'POST'; path: string; note: string }[] = [
   },
 ];
 
-const QUICKSTART = `import OpenAI from 'openai';
+const QUICKSTART = `// Option A: your existing OpenAI SDK, one line changed
+// npm i openai
+import OpenAI from 'openai';
 
 const client = new OpenAI({
   // Keys are optional during the bootstrap phase (see Authentication).
@@ -338,7 +340,18 @@ const stream = await client.chat.completions.create({
 
 for await (const chunk of stream) {
   process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
-}`;
+}
+
+// Option B: the native SDK, same call shape, no baseURL to set
+// npm i @wattz/sdk
+import { WattzClient } from '@wattz/sdk';
+
+const wattz = new WattzClient(); // defaults to https://api.wattz.fi/v1
+const res = await wattz.chat.completions.create({
+  model: 'llama-3.1-8b-instant',
+  messages: [{ role: 'user', content: 'Summarize the Wattz settlement flow.' }],
+  stream: true,
+});`;
 
 const CURL = `curl https://api.wattz.fi/v1/chat/completions \\
   -H 'content-type: application/json' \\
@@ -418,11 +431,10 @@ const SPLIT = `SETTLEMENT SPLIT   // anchor-program constants.rs
                           //   burned via a direct SPL Token Burn CPI`;
 
 const CLI = `npm install -g wattz-cli
-wattz node init --region us-east --gpu rtx-4090
-wattz node keys generate
-wattz node register
-wattz node start --models llama-3.1-8b-instant
-wattz node logs --follow`;
+wattz node init --region us-east --model llama-3-8b-instruct
+wattz node start
+wattz node status
+wattz stake --amount 100`;
 
 export function DocsView() {
   return (
