@@ -21,6 +21,8 @@ Power the inference.
 [![TypeScript](https://img.shields.io/badge/typescript-5.6-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 [![Solana](https://img.shields.io/badge/solana-devnet-9945FF?style=flat-square&logo=solana)](https://explorer.solana.com/address/GUDVbE4Jgmtu8jgxUVtq2wUmjdLxJzPqT3zET2EdTLiU?cluster=devnet)
 [![Anchor](https://img.shields.io/badge/anchor-0.31-D4AF37?style=flat-square)](https://www.anchor-lang.com)
+[![npm @wattz/sdk](https://img.shields.io/npm/v/@wattz/sdk?style=flat-square&logo=npm&label=%40wattz%2Fsdk&color=CB3837)](https://www.npmjs.com/package/@wattz/sdk)
+[![npm wattz-cli](https://img.shields.io/npm/v/wattz-cli?style=flat-square&logo=npm&label=wattz-cli&color=CB3837)](https://www.npmjs.com/package/wattz-cli)
 
 ## Status
 
@@ -216,7 +218,7 @@ Reproducible latency numbers (measured, not projected) live in
 - Vercel: `apps/web` and `apps/operator`.
 - Railway: `packages/inference-gateway` (Docker image from `Dockerfile.gateway`).
 - Solana: `packages/anchor-program` (devnet).
-- npm: `packages/sdk-ts` (`@wattz/sdk`), `packages/cli` (`wattz-cli`).
+- npm: [`@wattz/sdk`](https://www.npmjs.com/package/@wattz/sdk) (`packages/sdk-ts`), [`wattz-cli`](https://www.npmjs.com/package/wattz-cli) (`packages/cli`).
 - GPU: Docker Compose bundle in `packages/bootstrap-nodes/docker/` for local
   rigs; deploy scripts for Runpod, Vast.ai, and Lambda in the same folder.
 
