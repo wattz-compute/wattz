@@ -11,8 +11,8 @@ import {
 } from '@solana/web3.js';
 import { StatCard } from '@/components/StatCard';
 import { ErrorPanel } from '@/components/ErrorPanel';
-import { PROTOCOL_MIN_STAKE_SOL } from '@/lib/constants';
-import { explorerTxUrl, formatLamports, shortPubkey, solanaCluster } from '@/lib/format';
+import { PROTOCOL_MIN_STAKE_WATTZ } from '@/lib/constants';
+import { explorerTxUrl, formatSol, formatWattz, shortPubkey, solanaCluster } from '@/lib/format';
 
 async function anchorDiscriminator(name: string): Promise<Uint8Array> {
   const bytes = new TextEncoder().encode(`global:${name}`);
@@ -88,11 +88,11 @@ export default function StakePage() {
     if (!publicKey || !programIdStr) return;
     const lamports = Math.floor(Number(amount) * LAMPORTS_PER_SOL);
     if (!Number.isFinite(lamports) || lamports <= 0) {
-      setError('Enter a positive SOL amount.');
+      setError('Enter a positive $WATTZ amount.');
       return;
     }
     if (balanceLamports !== null && lamports + 5000 > balanceLamports) {
-      setError('Not enough SOL to cover stake + fee.');
+      setError('Not enough balance to cover stake + network fee.');
       return;
     }
     try {
@@ -138,12 +138,12 @@ export default function StakePage() {
       <section>
         <div className="metric-label">Operator stake</div>
         <h1 className="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-cluster md:text-4xl">
-          Stake SOL to your node identity
+          Stake $WATTZ to your node identity
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-fog">
-          Stake is required to be picked by the routing engine. Higher stake unlocks higher
-          routing priority; dishonest computation is slashable via dispute resolution on the
-          Anchor program.
+          Operators post $WATTZ as collateral to register a node. Bad attestations and dropped
+          sessions are slashable, and slashed stake is burned. Stake is a registration bond: the
+          router scores price, latency, reputation, and region, not stake size.
         </p>
       </section>
 
@@ -169,12 +169,13 @@ export default function StakePage() {
           />
           <StatCard
             label="SOL balance"
-            value={balanceLamports !== null ? formatLamports(balanceLamports) : '-'}
+            value={balanceLamports !== null ? formatSol(balanceLamports) : '-'}
+            hint="Native SOL for transaction fees"
             accent="gold"
           />
           <StatCard
             label="Current stake"
-            value={stakeLamports !== null ? formatLamports(stakeLamports) : '-'}
+            value={stakeLamports !== null ? formatWattz(stakeLamports) : '-'}
             hint={stakeLamports === 0 ? 'No stake account yet' : 'Held in your stake PDA'}
             accent="wire"
           />
@@ -189,7 +190,7 @@ export default function StakePage() {
       {publicKey && programIdStr && (
         <section className="wattz-card rounded-lg p-6">
           <label className="block">
-            <span className="metric-label">Stake amount (SOL)</span>
+            <span className="metric-label">Stake amount ($WATTZ)</span>
             <input
               type="number"
               min="0"
@@ -200,7 +201,7 @@ export default function StakePage() {
             />
           </label>
           <p className="mt-3 text-xs text-fog">
-            Protocol minimum stake is {PROTOCOL_MIN_STAKE_SOL} SOL.
+            Protocol minimum stake is {PROTOCOL_MIN_STAKE_WATTZ} $WATTZ, locked for 7 days.
           </p>
           <button
             onClick={handleStake}

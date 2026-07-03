@@ -7,7 +7,7 @@ import { RevenueChart } from '@/components/RevenueChart';
 import { ModelChip } from '@/components/ModelChip';
 import { StatCard } from '@/components/StatCard';
 import { ErrorPanel } from '@/components/ErrorPanel';
-import { errorTitle, formatLamports, formatNumber, formatPct, formatTflops, shortPubkey, timeAgo } from '@/lib/format';
+import { errorTitle, formatWattz, formatNumber, formatPct, formatTflops, shortPubkey, timeAgo } from '@/lib/format';
 
 const attestationLabel: Record<string, string> = {
   sgx: 'Intel SGX quote',
@@ -79,7 +79,7 @@ export default function NodeDetailPage({ params }: { params: { id: string } }) {
       <section className="grid gap-4 md:grid-cols-4">
         <StatCard label="Uptime 30d" value={formatPct(node.uptime_pct)} />
         <StatCard label="TFLOPS active" value={formatTflops(node.tflops_active)} accent="wire" />
-        <StatCard label="Stake" value={formatLamports(node.stake_lamports)} accent="gold" />
+        <StatCard label="Stake" value={formatWattz(node.stake_lamports)} accent="gold" />
         <StatCard label="Reputation" value={node.reputation.toFixed(2)} />
       </section>
 

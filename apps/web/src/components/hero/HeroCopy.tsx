@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { ClusterChip } from '@/components/ui/ClusterChip';
 import { SafeLink } from '@/components/layout/SafeLink';
+import { FLAGS } from '@/lib/flags';
+
+const github = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
 
 export function HeroCopy() {
   return (
@@ -29,16 +32,27 @@ export function HeroCopy() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 md:pointer-events-auto">
-        <SafeLink href="/playground">
-          <Button size="lg" variant="primary">
-            Try the playground
-          </Button>
-        </SafeLink>
-        <SafeLink href="/docs">
-          <Button size="lg" variant="ghost">
-            Read the spec
-          </Button>
-        </SafeLink>
+        {FLAGS.playground ? (
+          <SafeLink href="/playground">
+            <Button size="lg" variant="primary">
+              Try the playground
+            </Button>
+          </SafeLink>
+        ) : null}
+        {FLAGS.sdk ? (
+          <SafeLink href="/docs">
+            <Button size="lg" variant="ghost">
+              Read the spec
+            </Button>
+          </SafeLink>
+        ) : null}
+        {!FLAGS.playground && !FLAGS.sdk ? (
+          <SafeLink href={`https://github.com/${github}`}>
+            <Button size="lg" variant="primary">
+              View the source
+            </Button>
+          </SafeLink>
+        ) : null}
       </div>
     </div>
   );

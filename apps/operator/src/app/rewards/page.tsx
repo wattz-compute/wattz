@@ -13,7 +13,7 @@ import { api } from '@/lib/api';
 import { ErrorPanel } from '@/components/ErrorPanel';
 import { StatCard } from '@/components/StatCard';
 import { RevenueChart } from '@/components/RevenueChart';
-import { errorTitle, explorerTxUrl, formatLamports, solanaCluster, timeAgo } from '@/lib/format';
+import { errorTitle, explorerTxUrl, formatWattz, solanaCluster, timeAgo } from '@/lib/format';
 
 async function anchorDiscriminator(name: string): Promise<Uint8Array> {
   const bytes = new TextEncoder().encode(`global:${name}`);
@@ -137,13 +137,13 @@ export default function RewardsPage() {
           <section className="grid gap-4 md:grid-cols-3">
             <StatCard
               label="Pending"
-              value={formatLamports(rewards.pending_lamports)}
+              value={formatWattz(rewards.pending_lamports)}
               hint="Claimable now"
               accent="gold"
             />
             <StatCard
               label="Claimed lifetime"
-              value={formatLamports(rewards.claimed_lamports)}
+              value={formatWattz(rewards.claimed_lamports)}
               accent="wire"
             />
             <StatCard

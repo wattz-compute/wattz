@@ -13,22 +13,28 @@ const distribution = [
   { name: 'Ecosystem grants', value: 6, description: 'IDE integrations and OSS SDKs' },
 ];
 
-const utilities = [
+const utilities: { title: string; body: string; tag?: string }[] = [
+  {
+    title: 'Node stake collateral',
+    body: 'Operators post $WATTZ to register a node -- a protocol minimum of 100 $WATTZ, locked for 7 days. Bad attestations and dropped sessions are slashed, and the slashed stake is burned.',
+  },
   {
     title: 'Fee burn on every settlement',
     body: 'Each settled inference splits its fee 80/10/5/5 across node, node pending, model publisher, and project. Half of the project fee -- 2.5% of every settled fee -- is burned through a direct SPL Token Burn CPI.',
   },
   {
-    title: 'Node staking + slashing',
-    body: 'Operators post $WATTZ collateral. Bad attestations, region misreporting, or dropped sessions trigger dispute-driven slashing.',
+    title: 'Model publishing',
+    body: 'Registering a model to the on-chain registry stakes the publisher share; that publisher then earns 5% of every settlement routed to the model.',
   },
   {
     title: 'Priority routing lane',
-    body: 'Callers may stake $WATTZ for a priority queue - low-latency slots ahead of best-effort load.',
+    tag: 'planned',
+    body: 'A stake-weighted low-latency lane is a design intent, not live. Routing today scores price, latency, reputation, and region only.',
   },
   {
-    title: 'Dispute governance',
-    body: 'Any settlement can be disputed on Anchor. $WATTZ holders vote on complex judgments, resolvers earn micro fees.',
+    title: 'Community dispute resolution',
+    tag: 'at TGE',
+    body: 'Holder-voted judgments on disputed settlements are planned for TGE. On devnet, disputes resolve inside a one-hour window under admin control.',
   },
 ];
 
@@ -68,8 +74,15 @@ export function TokenSection() {
                   key={u.title}
                   className="border-l-2 border-cyan-glow/40 pl-4 text-cluster-white/85"
                 >
-                  <div className="font-display text-lg text-cluster-white">
-                    {u.title}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="font-display text-lg text-cluster-white">
+                      {u.title}
+                    </div>
+                    {u.tag ? (
+                      <Chip tone="muted" className="text-[9px]">
+                        {u.tag}
+                      </Chip>
+                    ) : null}
                   </div>
                   <p className="mt-1 text-sm leading-6 text-cluster-white/70">
                     {u.body}

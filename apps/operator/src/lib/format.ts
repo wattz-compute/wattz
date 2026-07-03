@@ -1,4 +1,15 @@
-export function formatLamports(n: number | bigint): string {
+// $WATTZ carries 9 decimals (Token-2022), so the base-unit -> whole-token
+// scale matches lamports. Stake, revenue, and rewards are all denominated in
+// $WATTZ by the settlement program.
+export function formatWattz(n: number | bigint): string {
+  const num = typeof n === 'bigint' ? Number(n) : n;
+  const wattz = num / 1_000_000_000;
+  return `${wattz.toFixed(4)} $WATTZ`;
+}
+
+// Only for values that truly are native SOL fetched from the chain -- e.g. the
+// operator wallet balance used to pay transaction fees.
+export function formatSol(n: number | bigint): string {
   const num = typeof n === 'bigint' ? Number(n) : n;
   const sol = num / 1_000_000_000;
   return `${sol.toFixed(4)} SOL`;

@@ -2,6 +2,7 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/Button';
 import { SafeLink } from '@/components/layout/SafeLink';
 import { Chip } from '@/components/ui/Chip';
+import { FLAGS } from '@/lib/flags';
 
 const twitter = process.env.NEXT_PUBLIC_TWITTER || 'wattzfi';
 const github = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
@@ -35,14 +36,22 @@ export function CtaSection() {
                 bare-metal node registers. The wire protocol does not change.
               </p>
               <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-                <SafeLink href="/playground">
-                  <Button size="lg">Try the playground</Button>
-                </SafeLink>
-                <SafeLink href="/docs">
-                  <Button size="lg" variant="ghost">
-                    Read the spec
-                  </Button>
-                </SafeLink>
+                {FLAGS.playground ? (
+                  <SafeLink href="/playground">
+                    <Button size="lg">Try the playground</Button>
+                  </SafeLink>
+                ) : (
+                  <SafeLink href={`https://github.com/${github}`}>
+                    <Button size="lg">View the source</Button>
+                  </SafeLink>
+                )}
+                {FLAGS.sdk ? (
+                  <SafeLink href="/docs">
+                    <Button size="lg" variant="ghost">
+                      Read the spec
+                    </Button>
+                  </SafeLink>
+                ) : null}
                 <SafeLink href={`https://x.com/${twitter}`}>
                   <Button size="lg" variant="wire">
                     Follow on X
@@ -61,7 +70,11 @@ export function CtaSection() {
                   href={explorerHref}
                   hint={programId ? `program ${programId.slice(0, 4)}...${programId.slice(-4)}` : 'Anchor 0.31'}
                 />
-                <MicroLink label="Operator" href="/operator" hint="Node onboarding" />
+                {FLAGS.operator ? (
+                  <MicroLink label="Operator" href="/operator" hint="Node onboarding" />
+                ) : (
+                  <MicroLink label="Grid status" href="/status" hint="Live component checks" />
+                )}
               </div>
             </div>
           </div>

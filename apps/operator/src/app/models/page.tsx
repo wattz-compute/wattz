@@ -63,7 +63,7 @@ export default function ModelsPage() {
               <th className="px-4 py-3 text-right">Context</th>
               <th className="px-4 py-3 text-right">
                 Price (p/c)
-                <span className="block text-[10px] normal-case text-fog/70">SOL / 1k tok</span>
+                <span className="block text-[10px] normal-case text-fog/70">$WATTZ / 1k tok</span>
               </th>
               <th className="px-4 py-3 text-right">VRAM</th>
             </tr>

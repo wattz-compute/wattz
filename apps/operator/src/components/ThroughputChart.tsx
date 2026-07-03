@@ -72,7 +72,7 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
               fontSize: 12,
             }}
             formatter={(value: number, key) => {
-              if (key === 'revenue') return [`${value.toFixed(4)} SOL`, 'revenue'];
+              if (key === 'revenue') return [`${value.toFixed(4)} $WATTZ`, 'revenue'];
               return [value.toLocaleString(), 'inferences'];
             }}
           />

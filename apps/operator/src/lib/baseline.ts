@@ -26,7 +26,7 @@ const HOUR = 3600;
 const DAY = 24 * HOUR;
 const LAMPORTS = 1_000_000_000;
 const PREVIEW = 'network-preview' as const;
-// Every roster stake sits at or above PROTOCOL_MIN_STAKE_SOL (see lib/constants),
+// Every roster stake sits at or above PROTOCOL_MIN_STAKE_WATTZ (see lib/constants),
 // so the fleet preview never undercuts the minimum shown on the stake page.
 
 // Canonical model ids. Chat models are served today through the Groq relay
@@ -48,17 +48,17 @@ const MODEL_PRICES: Record<string, { prompt: number; completion: number }> = {
 
 // Revenue cross-foots from a single set of anchors:
 //   daily_tokens = daily_inferences x avg tokens/inference
-//   daily_revenue = daily_tokens/1k x blended posted price (SOL/1k)
+//   daily_revenue = daily_tokens/1k x blended posted price ($WATTZ/1k)
 const DAILY_INFERENCES = 42_130;
 const AVG_TOKENS_PER_INFERENCE = 1661;
 const DAILY_TOKENS = DAILY_INFERENCES * AVG_TOKENS_PER_INFERENCE;
-const BLENDED_PRICE_PER_1K_SOL =
+const BLENDED_PRICE_PER_1K_WATTZ =
   RELAY_MODELS.reduce(
     (sum, id) => sum + (MODEL_PRICES[id].prompt + MODEL_PRICES[id].completion) / 2,
     0,
   ) / RELAY_MODELS.length;
 const DAILY_REVENUE_LAMPORTS = Math.round(
-  (DAILY_TOKENS / 1000) * BLENDED_PRICE_PER_1K_SOL * LAMPORTS,
+  (DAILY_TOKENS / 1000) * BLENDED_PRICE_PER_1K_WATTZ * LAMPORTS,
 );
 const NETWORK_AGE_DAYS = 45;
 const CUMULATIVE_REVENUE_LAMPORTS = DAILY_REVENUE_LAMPORTS * NETWORK_AGE_DAYS;
@@ -76,7 +76,7 @@ interface RosterEntry {
   online: boolean;
   uptime_pct: number;
   tflops_active: number;
-  stake_sol: number;
+  stake_wattz: number;
   reputation: number;
   attestation_kind: AttestationKind;
   gpus: string[];
@@ -100,7 +100,7 @@ const ROSTER: RosterEntry[] = [
     online: true,
     uptime_pct: 99.62,
     tflops_active: 82,
-    stake_sol: 1200,
+    stake_wattz: 1200,
     reputation: 4.82,
     attestation_kind: 'nvidia_cc',
     gpus: ['H100 80GB', 'H100 80GB'],
@@ -115,7 +115,7 @@ const ROSTER: RosterEntry[] = [
     online: true,
     uptime_pct: 98.15,
     tflops_active: 41,
-    stake_sol: 650,
+    stake_wattz: 650,
     reputation: 4.56,
     attestation_kind: 'sev',
     gpus: ['A100 40GB'],
@@ -130,7 +130,7 @@ const ROSTER: RosterEntry[] = [
     online: true,
     uptime_pct: 97.88,
     tflops_active: 66,
-    stake_sol: 880,
+    stake_wattz: 880,
     reputation: 4.41,
     attestation_kind: 'sgx',
     gpus: ['L40S', 'L40S'],
@@ -145,7 +145,7 @@ const ROSTER: RosterEntry[] = [
     online: true,
     uptime_pct: 96.24,
     tflops_active: 54,
-    stake_sol: 410,
+    stake_wattz: 410,
     reputation: 4.11,
     attestation_kind: 'risc0',
     gpus: ['A100 80GB'],
@@ -160,7 +160,7 @@ const ROSTER: RosterEntry[] = [
     online: false,
     uptime_pct: 88.03,
     tflops_active: 0,
-    stake_sol: 230,
+    stake_wattz: 230,
     reputation: 3.44,
     attestation_kind: 'none',
     gpus: ['RTX 4090'],
@@ -175,7 +175,7 @@ const ROSTER: RosterEntry[] = [
     online: true,
     uptime_pct: 99.11,
     tflops_active: 25,
-    stake_sol: 340,
+    stake_wattz: 340,
     reputation: 4.28,
     attestation_kind: 'sp1',
     gpus: ['H100 80GB'],
@@ -200,7 +200,7 @@ function previewNodes(): PreviewNode[] {
     online: r.online,
     uptime_pct: r.uptime_pct,
     tflops_active: r.tflops_active,
-    stake_lamports: Math.round(r.stake_sol * LAMPORTS),
+    stake_lamports: Math.round(r.stake_wattz * LAMPORTS),
     reputation: r.reputation,
     attestation_kind: r.attestation_kind,
     gpus: r.gpus,
@@ -409,7 +409,7 @@ export function baselineNodeDetail(id: string): NodeDetail | null {
     };
   });
 
-  const stakeSol = (node.stake_lamports / LAMPORTS).toFixed(0);
+  const stakeWattz = (node.stake_lamports / LAMPORTS).toFixed(0);
   const events: NodeEvent[] = node.online
     ? [
         {
@@ -430,7 +430,7 @@ export function baselineNodeDetail(id: string): NodeDetail | null {
         {
           timestamp: now - 28 * HOUR,
           kind: 'stake',
-          message: `stake set to ${stakeSol} SOL`,
+          message: `stake set to ${stakeWattz} $WATTZ`,
         },
         {
           timestamp: node.first_seen,
@@ -452,7 +452,7 @@ export function baselineNodeDetail(id: string): NodeDetail | null {
         {
           timestamp: now - 26 * HOUR,
           kind: 'stake',
-          message: `stake set to ${stakeSol} SOL`,
+          message: `stake set to ${stakeWattz} $WATTZ`,
         },
         {
           timestamp: node.first_seen,
@@ -479,7 +479,7 @@ export function baselineStatsHistory(): StatsHistoryResponse {
     const inferences = Math.round(DAILY_INFERENCES * factor);
     const tokens = inferences * AVG_TOKENS_PER_INFERENCE;
     const revenue_lamports = Math.round(
-      (tokens / 1000) * BLENDED_PRICE_PER_1K_SOL * LAMPORTS,
+      (tokens / 1000) * BLENDED_PRICE_PER_1K_WATTZ * LAMPORTS,
     );
     return { timestamp: ts, inferences, tokens, revenue_lamports };
   });

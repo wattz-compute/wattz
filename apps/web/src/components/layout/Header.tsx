@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { SafeLink } from './SafeLink';
 import { ClusterChip } from '@/components/ui/ClusterChip';
 import { cn } from '@/lib/cn';
+import { FLAGS } from '@/lib/flags';
 
 const WalletMultiButton = dynamic(
   async () =>
@@ -19,9 +20,9 @@ const nav = [
   { href: '/#solution', label: 'Solution' },
   { href: '/#features', label: 'Features' },
   { href: '/#token', label: 'Token' },
-  { href: '/playground', label: 'Playground' },
-  { href: '/operator', label: 'Operator' },
-  { href: '/docs', label: 'Docs' },
+  ...(FLAGS.playground ? [{ href: '/playground', label: 'Playground' }] : []),
+  ...(FLAGS.operator ? [{ href: '/operator', label: 'Operator' }] : []),
+  ...(FLAGS.sdk ? [{ href: '/docs', label: 'Docs' }] : []),
 ];
 
 export function Header() {

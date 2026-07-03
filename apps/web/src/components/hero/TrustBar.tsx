@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { SafeLink } from '@/components/layout/SafeLink';
 import { cn } from '@/lib/cn';
+import { FLAGS } from '@/lib/flags';
 
 // The stats contract served by GET /api/stats. Every value shown here is
 // click-verifiable against the live gateway or the Solana explorer; nothing
@@ -65,7 +66,11 @@ function buildCells(data?: StatsResponse): Cell[] {
     { label: 'relay-live models', value: relayLive },
     // Zero-width space marks the only allowed break point so the path never
     // splits mid-word in narrow cells.
-    { label: 'openai wire', value: '/v1/chat/​completions', href: '/docs' },
+    {
+      label: 'openai wire',
+      value: '/v1/chat/​completions',
+      href: FLAGS.sdk ? '/docs' : `https://github.com/${GITHUB}`,
+    },
     { label: 'relay', value: data?.relay?.provider ?? EM },
     {
       label: 'external nodes',

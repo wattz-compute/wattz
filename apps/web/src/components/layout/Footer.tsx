@@ -1,6 +1,7 @@
 import { SafeLink } from './SafeLink';
 import { CopyAddress } from '@/components/ui/CopyAddress';
 import { projectCa } from '@/lib/solana';
+import { FLAGS } from '@/lib/flags';
 
 const twitter = process.env.NEXT_PUBLIC_TWITTER || 'wattzfi';
 const github = process.env.NEXT_PUBLIC_GITHUB || 'wattz-compute/wattz';
@@ -37,19 +38,35 @@ export function Footer() {
             Product
           </div>
           <ul className="mt-4 space-y-3 text-sm text-cluster-white/85">
+            {FLAGS.playground ? (
+              <li>
+                <SafeLink href="/playground" className="hover:text-cyan-glow">
+                  Inference Playground
+                </SafeLink>
+              </li>
+            ) : null}
+            {FLAGS.operator ? (
+              <li>
+                <SafeLink href="/operator" className="hover:text-cyan-glow">
+                  Operator Dashboard
+                </SafeLink>
+              </li>
+            ) : null}
+            {FLAGS.sdk ? (
+              <li>
+                <SafeLink href="/docs" className="hover:text-cyan-glow">
+                  Docs
+                </SafeLink>
+              </li>
+            ) : null}
             <li>
-              <SafeLink href="/playground" className="hover:text-cyan-glow">
-                Inference Playground
+              <SafeLink href="/status" className="hover:text-cyan-glow">
+                Grid Status
               </SafeLink>
             </li>
             <li>
-              <SafeLink href="/operator" className="hover:text-cyan-glow">
-                Operator Dashboard
-              </SafeLink>
-            </li>
-            <li>
-              <SafeLink href="/docs" className="hover:text-cyan-glow">
-                Docs
+              <SafeLink href="/receipts" className="hover:text-cyan-glow">
+                Settlement Receipts
               </SafeLink>
             </li>
           </ul>

@@ -1,6 +1,6 @@
 import type { NodeInfo } from '@/types/wattz';
 import { SafeLink } from './layout/SafeLink';
-import { formatLamports, formatPct, formatTflops, shortPubkey, timeAgo } from '@/lib/format';
+import { formatWattz, formatPct, formatTflops, shortPubkey, timeAgo } from '@/lib/format';
 
 interface NodeCardProps {
   node: NodeInfo;
@@ -46,7 +46,7 @@ export function NodeCard({ node }: NodeCardProps) {
         </div>
         <div>
           <dt className="metric-label">Stake</dt>
-          <dd className="metric-value text-lg">{formatLamports(node.stake_lamports)}</dd>
+          <dd className="metric-value text-lg">{formatWattz(node.stake_lamports)}</dd>
         </div>
         <div>
           <dt className="metric-label">Reputation</dt>

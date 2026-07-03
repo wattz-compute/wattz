@@ -20,7 +20,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="wattz-card flex h-72 flex-col rounded-lg p-4">
-        <div className="metric-label mb-3">Revenue (SOL / day)</div>
+        <div className="metric-label mb-3">Revenue ($WATTZ / day)</div>
         <div className="flex flex-1 items-center justify-center text-center text-xs text-fog">
           No revenue recorded yet.
         </div>
@@ -39,7 +39,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
   return (
     <div className="wattz-card h-72 rounded-lg p-4">
-      <div className="metric-label mb-3">Revenue (SOL / day) + requests</div>
+      <div className="metric-label mb-3">Revenue ($WATTZ / day) + requests</div>
       <ResponsiveContainer width="100%" height="88%">
         <ComposedChart data={rows} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
           <CartesianGrid stroke="rgba(255,217,61,0.06)" vertical={false} />
@@ -72,7 +72,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
               fontSize: 12,
             }}
             formatter={(value: number, key) => {
-              if (key === 'revenue') return [`${value.toFixed(4)} SOL`, 'revenue'];
+              if (key === 'revenue') return [`${value.toFixed(4)} $WATTZ`, 'revenue'];
               return [value.toLocaleString(), 'requests'];
             }}
           />

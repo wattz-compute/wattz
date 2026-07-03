@@ -8,7 +8,7 @@ import { NodeCard } from '@/components/NodeCard';
 import { StatCard } from '@/components/StatCard';
 import { ErrorPanel } from '@/components/ErrorPanel';
 import { ThroughputChart } from '@/components/ThroughputChart';
-import { errorTitle, formatLamports, formatNumber, formatTflops, solanaCluster } from '@/lib/format';
+import { errorTitle, formatWattz, formatNumber, formatTflops, solanaCluster } from '@/lib/format';
 
 type View = 'network' | 'mine';
 
@@ -152,10 +152,10 @@ export default function DashboardPage() {
         />
         <StatCard
           label="Revenue / 24h"
-          value={statsQuery.data ? formatLamports(statsQuery.data.daily_revenue_lamports) : '-'}
+          value={statsQuery.data ? formatWattz(statsQuery.data.daily_revenue_lamports) : '-'}
           hint={
             statsQuery.data
-              ? `pending rewards ${formatLamports(statsQuery.data.pending_rewards_lamports)}`
+              ? `pending rewards ${formatWattz(statsQuery.data.pending_rewards_lamports)}`
               : undefined
           }
           accent="gold"
