@@ -1,5 +1,7 @@
 # Wattz
 
+**CA: fxcX1xSZ4Uz9pimw97XENdEHwexHrfaRkEkKeHupump**
+
 ![Wattz banner](docs/assets/banner.png)
 
 The first OpenAI-wire-compatible inference marketplace on Solana. An
